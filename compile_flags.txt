@@ -1,0 +1,9 @@
+clang++
+-I./include
+-std=c++17
+-O2
+-flto
+-Wall
+-Wextra
+-Wpedantic
+-lraylib
