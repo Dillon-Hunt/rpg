@@ -52,6 +52,8 @@
 #define TREE_1_TEXTURE_PATH "resources/tree1.png"
 #define TREE_2_TEXTURE_PATH "resources/tree2.png"
 
+#define FENCE_TEXTURE_PATH "resources/fence.png"
+
 #define LARGE_SHADOW_TEXTURE_PATH "resources/tree-shadow.png"
 #define SMALL_SHADOW_TEXTURE_PATH "resources/npc-shadow.png"
 
@@ -61,6 +63,6 @@
 
 // Debug
 
-#define SHOW_COLLISION_SHAPE false
+#define SHOW_COLLISION_SHAPE true
 
 #endif // CONFIG_H

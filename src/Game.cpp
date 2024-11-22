@@ -8,7 +8,7 @@
 #include "Config.h"
 
 #include "NPC.h"
-#include "Tree.h"
+#include "Obstacle.h"
 
 #include <iostream>
 #include <memory>
@@ -42,9 +42,73 @@ void Game::init() {
 
     // Game Objects
 
-    entities.push_back(std::make_unique<Tree>(LoadTexture(TREE_1_TEXTURE_PATH), Vector2{ 10 * CELL_SIZE * SCALE, 10 * CELL_SIZE * SCALE }, 48, 48));
-    entities.push_back(std::make_unique<Tree>(LoadTexture(TREE_1_TEXTURE_PATH), Vector2{ 10 * CELL_SIZE * SCALE, 12 * CELL_SIZE * SCALE }, 48, 48));
-    entities.push_back(std::make_unique<Tree>(LoadTexture(TREE_1_TEXTURE_PATH), Vector2{ 12 * CELL_SIZE * SCALE, 12 * CELL_SIZE * SCALE }, 48, 48));
+    gameObjects.emplace(
+        std::make_pair(
+            10,
+            10
+        ),
+        std::make_unique<Obstacle>(
+            LoadTexture(FENCE_TEXTURE_PATH),
+            Vector2{
+                10 * CELL_SIZE * SCALE,
+                10 * CELL_SIZE * SCALE
+            },
+            16,
+            120,
+            96
+        )
+    );
+
+    gameObjects.emplace(
+        std::make_pair(
+            11,
+            10
+        ),
+        std::make_unique<Obstacle>(
+            LoadTexture(FENCE_TEXTURE_PATH),
+            Vector2{
+                11 * CELL_SIZE * SCALE,
+                10 * CELL_SIZE * SCALE
+            },
+            18,
+            120,
+            96
+        )
+    );
+
+    gameObjects.emplace(
+        std::make_pair(
+            10,
+            9
+        ),
+        std::make_unique<Obstacle>(
+            LoadTexture(FENCE_TEXTURE_PATH),
+            Vector2{
+                10 * CELL_SIZE * SCALE,
+                9 * CELL_SIZE * SCALE
+            },
+            1,
+            120,
+            96
+        )
+    );
+
+    gameObjects.emplace(
+        std::make_pair(
+            11,
+            9
+        ),
+        std::make_unique<Obstacle>(
+            LoadTexture(FENCE_TEXTURE_PATH),
+            Vector2{
+                11 * CELL_SIZE * SCALE,
+                9 * CELL_SIZE * SCALE
+            },
+            3,
+            120,
+            96
+        )
+    );
 
     // Camera Setup
     
@@ -152,11 +216,19 @@ void Game::handle_input() {
     direction = Vector2Normalize(direction);
 
     // Move Player
-    player.slide(direction * SCALE * SPEED);
+    player.slide(Vector2{ direction.x, 0.0f } * SCALE * SPEED);
 
     // Move player back if movement caused collision
-    if (player.checkCollisions(entities)) {
-        player.slide(direction * SCALE * SPEED * -1);
+    if (player.checkCollisions<Entity>(entities) || player.checkCollisions<GameObject>(gameObjects)) {
+        player.slide(Vector2{ -direction.x, 0.0f } * SCALE * SPEED);
+    }
+
+    // Move Player
+    player.slide(Vector2{ 0.0f, direction.y } * SCALE * SPEED);
+
+    // Move player back if movement caused collision
+    if (player.checkCollisions<Entity>(entities) || player.checkCollisions<GameObject>(gameObjects)) {
+        player.slide(Vector2{ 0.0f, -direction.y } * SCALE * SPEED);
     }
 
     // Move camera
@@ -213,6 +285,23 @@ void Game::update() {
         ) <= 1) {
             entity->update(player);
             entity->draw();
+        }
+    }
+
+    // Display all Game Objects
+
+    for (auto& object : gameObjects) {
+        if (Vector2Distance(
+            {
+                (float) object.second->getChunkX(),
+                (float) object.second->getChunkY()
+            },
+            {
+                (float) player.getChunkX(),
+                (float) player.getChunkY()
+            }
+        ) <= 1) {
+            object.second->draw();
         }
     }
 

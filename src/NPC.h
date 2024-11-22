@@ -13,15 +13,13 @@ class NPC : public Entity {
     public:
         NPC() : waypoint(0) {};
 
-        NPC(const Texture& texture, const Vector2& position, int w, int h) : Entity(texture, position), waypoint(0) {
-            width = w;
-            height = h;
+        NPC(const Texture& texture, const Vector2& position, int width, int height) : Entity(texture, position, width, height), waypoint(0) {
             waypoints.push_back(position);
         };
 
         void addWaypoint(const Vector2& w);
 
-        void update(const Entity& player) override;
+        void update(const GameObject& player) override;
 };
 
 #endif // NPC_H
