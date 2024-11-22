@@ -44,7 +44,7 @@ class Game {
          */
         void cleanup();
 
-        /* Determines whither to close the game window
+        /* Determines whether to close the game window
          */
         bool shouldClose() const;
 };

@@ -2,14 +2,13 @@
 
 #include "Config.h"
 
-#include <iostream>
-
-void Pallet::loadTexture(int key, const char* path) {
-    textures.emplace(key, std::make_unique<Texture2D>(LoadTexture(path)));
+void Pallet::loadTexture(int key, const char* path, bool isBase) {
+    if (isBase) countBase++;
+    textures.emplace(key, std::make_pair(std::make_unique<Texture2D>(LoadTexture(path)), isBase));
 }
 
 const std::shared_ptr<Texture2D> Pallet::getTexture(int key) const {
-    return textures.at(key);
+    return textures.at(key).first;
 }
 
 int Pallet::getTextureFromPallet() const {
@@ -26,12 +25,12 @@ int Pallet::getTextureFromPallet() const {
         return -1;
     }
 
-    return x + y * 2;
+    return x + y * 2 + 1;
 }
 
 void Pallet::unloadTextures() {
     for (const auto& pair : textures) {
-        UnloadTexture(*pair.second);
+        UnloadTexture(*pair.second.first);
     }
 }
 
@@ -42,35 +41,48 @@ void Pallet::renderPallet() const {
         WIDTH - CELL_SIZE * SCALE * 2 - PALLET_BORDER * SCALE * 2,
         0,
         CELL_SIZE * SCALE * 2 + PALLET_BORDER * SCALE * 2,
-        CELL_SIZE * SCALE * ceil((textures.size() + 1) / 2) + PALLET_BORDER * SCALE * 2,
+        CELL_SIZE * SCALE * ceil((countBase + 1) / 2) + PALLET_BORDER * SCALE * 2,
         WHITE
     );
 
     for (const auto& pair : textures) {
-        DrawTexturePro(
-            *pair.second,
-            {
-                0 * CELL_SIZE,
-                3 * CELL_SIZE,
-                CELL_SIZE,
-                CELL_SIZE
-            },
-            {
-                WIDTH + CELL_SIZE * SCALE * (i % 2) -  CELL_SIZE * SCALE * 2 - PALLET_BORDER * SCALE,
-                CELL_SIZE * SCALE * (i - i % 2) / 2 + PALLET_BORDER * SCALE,
-                CELL_SIZE * SCALE,
-                CELL_SIZE * SCALE
-            },
-            {
+        if (pair.second.second) {
+            DrawTexturePro(
+                *pair.second.first,
+                {
+                    0 * CELL_SIZE,
+                    3 * CELL_SIZE,
+                    CELL_SIZE,
+                    CELL_SIZE
+                },
+                {
+                    WIDTH + CELL_SIZE * SCALE * (i % 2) -  CELL_SIZE * SCALE * 2 - PALLET_BORDER * SCALE,
+                    CELL_SIZE * SCALE * (i - i % 2) / 2 + PALLET_BORDER * SCALE,
+                    CELL_SIZE * SCALE,
+                    CELL_SIZE * SCALE
+                },
+                {
+                    0.0f,
+                    0.0f
+                },
                 0.0f,
-                0.0f
-            },
-            0.0f,
-            WHITE
-        );
+                WHITE
+            );
 
-        i++;
+            i++;
+        }
     }
+}
+
+IntPair Pallet::getMinMax(const std::array<int, 4>& keys) const {
+    IntPair result;
+
+    result.min = *std::min_element(keys.begin(), keys.end());
+    result.max = *std::max_element(keys.begin(), keys.end());
+
+    if (result.min == result.max) result.min = GRASS;
+
+    return result;
 }
 
 Vector2 Pallet::getImageSourcePosition(const std::array<int, 4>& keys) const {
@@ -97,15 +109,46 @@ Vector2 Pallet::getImageSourcePosition(const std::array<int, 4>& keys) const {
         {{ 1, 0, 1, 0 }, { 2, 3 }},
     };
 
-    return mapping.find(keys)->second;
+    IntPair limits = getMinMax(keys);
+
+    std::array<int, 4> limited = { 0, 0, 0, 0 };
+
+    if (limited != keys) {
+        for (int i = 0; i < 4; i++) {
+            if (keys[i] == limits.max) {
+                limited[i] = 1;
+            }
+        }
+    }
+
+    return mapping.find(limited)->second;
     
 }
 
-void Pallet::drawTile(int x, int y, int key, const std::array<int, 4>& keys) const {
+const std::shared_ptr<Texture2D> Pallet::getTileTexture(const std::array<int, 4>& keys) const {
+    IntPair limits = getMinMax(keys);
+    std::array<int, 2> key = { limits.min, limits.max };
+
+    static const std::map<std::array<int, 2>, int> mapping = {
+        {{ GRASS, GRASS }, GRASS_DIRT },
+        {{ GRASS, DIRT }, GRASS_DIRT },
+        {{ GRASS, WATER }, GRASS_WATER },
+        {{ GRASS, GARDEN }, GRASS_GARDEN },
+        {{ DIRT, WATER }, DIRT_WATER }
+    };
+
+    auto it = mapping.find(key);
+
+    if (it == mapping.end()) return getTexture(GRASS_DIRT);
+    return getTexture(it->second);
+
+}
+
+void Pallet::drawTile(int x, int y, const std::array<int, 4>& keys) const {
     Vector2 sourceImagePosition = getImageSourcePosition(keys);
 
     DrawTexturePro(
-        *getTexture(key),
+        *getTileTexture(keys),
         {
             sourceImagePosition.x * CELL_SIZE,
             sourceImagePosition.y * CELL_SIZE,

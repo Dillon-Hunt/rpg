@@ -37,11 +37,11 @@ Vector2 Entity::getPosition() const {
 }
 
 int Entity::getX() const {
-    return position.x / CELL_SIZE / SCALE - 0.5f - (position.x < 0 ? 1 : 0);
+    return position.x / (CELL_SIZE * SCALE) - 0.5f - (position.x - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
 }
 
 int Entity::getY() const {
-    return position.y / CELL_SIZE / SCALE - 0.5f - (position.y < 0 ? 1 : 0);
+    return position.y / (CELL_SIZE * SCALE) - 0.5f - (position.y - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
 }
 
 int Entity::getChunkX() const {

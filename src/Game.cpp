@@ -15,6 +15,8 @@ void Game::init() {
     std::cout << "Initializing game..." << std::endl;
 
     // SearchAndSetResourceDir("resources");
+    SetTraceLogLevel(LOG_ERROR); 
+    
     InitWindow(WIDTH, HEIGHT, "RPG Game");
     SetTargetFPS(FPS);
     SetExitKey(0);
@@ -45,15 +47,19 @@ void Game::init() {
 
     // Tile Pallet
 
-    pallet.loadTexture(GRASS_DIRT, GRASS_DIRT_TEXTURE_PATH);
-    pallet.loadTexture(GRASS_WATER, GRASS_WATER_TEXTURE_PATH);
-    pallet.loadTexture(GRASS_GRASS, GRASS_GRASS_TEXTURE_PATH);
+    // Base Textures
+    pallet.loadTexture(GRASS_DIRT, GRASS_DIRT_TEXTURE_PATH, true);
+    pallet.loadTexture(GRASS_WATER, GRASS_WATER_TEXTURE_PATH, true);
+    pallet.loadTexture(GRASS_GARDEN, GRASS_GARDEN_TEXTURE_PATH, true);
+
+    // Intermediate Textures
+    pallet.loadTexture(DIRT_WATER, DIRT_WATER_TEXTURE_PATH, false);
 
     // Chunks
     
     for (int x = -2; x <= 2; x++) {
         for (int y = -2; y <= 2; y++) {
-            chunks.emplace(std::make_pair(x, y), std::make_unique<Chunk>(x, y));
+            chunks.emplace(std::make_pair(x, y), std::make_unique<Chunk>(x, y, chunks, pallet));
         }
     }
 
@@ -73,28 +79,29 @@ void Game::handle_input() {
         mouse.deselect();
     }
 
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        editMode = false;
+        mouse.deselect();
+    }
+
     // Draw tile
-    if (mouse.isSelected() || editMode) {
-        if (IsKeyPressed(KEY_BACKSPACE)) {
+    if (editMode) {
+        if (IsKeyDown(KEY_BACKSPACE)) {
             chunks.at(std::make_pair(mouse.getChunkX(), mouse.getChunkY()))->unset(mouse.getRelativeX(), mouse.getRelativeY());
             mouse.deselect();
         }
 
-        if (editMode && IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+        if ((IsMouseButtonDown(MOUSE_LEFT_BUTTON) && IsKeyDown(KEY_LEFT_SHIFT)) || IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
             chunks.at(std::make_pair(mouse.getChunkX(), mouse.getChunkY()))->unset(mouse.getRelativeX(), mouse.getRelativeY());
-        }
-
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        } else if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
             int key = pallet.getTextureFromPallet();
             bool draw = true;
 
-            if (editMode) {
-                if (key == -1) {
-                    key = selected;
-                } else {
-                    selected = key;
-                    draw = false;
-                }
+            if (key == -1) {
+                key = selected;
+            } else {
+                selected = key;
+                draw = false;
             }
 
             if (key != -1 && draw) {
@@ -105,37 +112,29 @@ void Game::handle_input() {
                 )->set(
                     mouse.getRelativeX(),
                     mouse.getRelativeY(),
-                    key,
-                    chunks
+                    key
                 );
 
-                if (!editMode) {
-                    selected = key;
-                    mouse.deselect();
-                }
+                selected = key;
             } else {
                 mouse.updatePosition(camera.target.x - camera.offset.x, camera.target.y - camera.offset.y);
             }
         }
     } else {
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !IsKeyDown(KEY_LEFT_SHIFT)) {
+            mouse.updatePosition(camera.target.x - camera.offset.x, camera.target.y - camera.offset.y);
             mouse.select();
         }
-    }
-
-    // Deselect tile
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        mouse.deselect();
     }
 
     // Determine direction vector
     
     Vector2 direction = { 0, 0 };
 
-    if (IsKeyDown(KEY_RIGHT)) direction.x = 1;
-    if (IsKeyDown(KEY_LEFT)) direction.x = -1;
-    if (IsKeyDown(KEY_UP)) direction.y = -1;
-    if (IsKeyDown(KEY_DOWN)) direction.y = 1;
+    if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) direction.x = 1;
+    if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) direction.x = -1;
+    if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) direction.y = -1;
+    if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) direction.y = 1;
 
     direction = Vector2Normalize(direction);
 
@@ -171,7 +170,7 @@ void Game::update() {
             auto iterator = chunks.find(chunk);
 
             if (iterator == chunks.end()) {
-                chunks.emplace(chunk, std::make_unique<Chunk>(chunk.first, chunk.second));
+                chunks.emplace(chunk, std::make_unique<Chunk>(chunk.first, chunk.second, chunks, pallet));
             }
         }
     }
@@ -179,7 +178,7 @@ void Game::update() {
     // Display 9 chunks around player
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            chunks.at(std::make_pair(x + player.getChunkX(), y + player.getChunkY()))->draw(pallet, chunks);
+            chunks.at(std::make_pair(x + player.getChunkX(), y + player.getChunkY()))->draw();
         }
     }
 
@@ -209,17 +208,56 @@ void Game::update() {
     EndMode2D();
 
     // Draw pallet selector
-    if (mouse.isSelected() || editMode) {
+    if (editMode) {
         pallet.renderPallet();
     }
 
+    float y = CELL_SIZE * SCALE / 2;
+
+    DrawFPS(CELL_SIZE * SCALE / 2, y);
+
+    y += TEXT_SEPARATION;
+
     // Print info to screen
     char text[50];
-
     snprintf(text, sizeof(text), "Player Position: (%d, %d)", player.getX(), player.getY());
+    DrawText(text, CELL_SIZE * SCALE / 2, y, 15, BLACK);
 
-    DrawFPS(CELL_SIZE * SCALE / 2, CELL_SIZE * SCALE / 2);
-    DrawText(text, CELL_SIZE * SCALE / 2, CELL_SIZE * SCALE, 15, BLACK);
+    y += TEXT_SEPARATION * 2;
+
+    if (mouse.isSelected()) {
+        strcpy(text, "Selected Tile:");
+        DrawText(text, CELL_SIZE * SCALE / 2, y, 15, BLACK);
+
+        y += TEXT_SEPARATION;
+
+        snprintf(text, sizeof(text), "Position: (%d, %d)", mouse.getX(), mouse.getY());
+        DrawText(text, CELL_SIZE * SCALE / 2, y, 15, BLACK);
+
+        y += TEXT_SEPARATION;
+
+        int key = chunks.at(std::make_pair(mouse.getChunkX(), mouse.getChunkY()))->getKey(mouse.getRelativeX(), mouse.getRelativeY());
+
+        std::string tile = "";
+
+        switch (key) {
+            case GRASS:
+                tile = "Grass";
+                break;
+            case DIRT: 
+                tile = "Dirt";
+                break;
+            case WATER: 
+                tile = "Water";
+                break;
+            case GARDEN: 
+                tile = "Garden";
+                break;
+        }
+        
+        snprintf(text, sizeof(text), "Name: %s", tile.c_str());
+        DrawText(text, CELL_SIZE * SCALE / 2, y, 15, BLACK);
+    }
 
     EndDrawing();
 }

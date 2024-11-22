@@ -11,6 +11,10 @@
 #define FPS 120
 #define SPEED 0.75f * BASE_FPS / FPS
 
+// HUD
+
+#define TEXT_SEPARATION 20
+
 // Pallet
 
 #define PALLET_BORDER 4
@@ -24,16 +28,18 @@
 #define GRASS 0
 #define DIRT 1
 #define WATER 2
+#define GARDEN 3
 
 #define GRASS_DIRT 0
 #define GRASS_WATER 1
-#define GRASS_GRASS 2
+#define GRASS_GARDEN 2
+#define DIRT_WATER 3
 
 #define GRASS_DIRT_TEXTURE_PATH "resources/grass-dirt.png"
 #define GRASS_WATER_TEXTURE_PATH "resources/grass-water.png"
-#define GRASS_GRASS_TEXTURE_PATH "resources/grass-grass.png"
+#define GRASS_GARDEN_TEXTURE_PATH "resources/grass-grass.png"
 
-// #define DIRT_WATER_TEXTURE_PATH "resources/dirt-water.png"
+#define DIRT_WATER_TEXTURE_PATH "resources/dirt-water.png"
 
 #define PLAYER_TEXTURE_PATH "resources/player.png"
 
