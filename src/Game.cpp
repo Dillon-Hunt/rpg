@@ -6,7 +6,9 @@
 #include "raymath.h"
 
 #include "Config.h"
+
 #include "NPC.h"
+#include "Tree.h"
 
 #include <iostream>
 #include <memory>
@@ -23,20 +25,26 @@ void Game::init() {
     
     // Player Setup
     
-    player.setTexture(LoadTexture(PLAYER_TEXTURE_PATH));
+    player.setTexture(LoadTexture(PLAYER_TEXTURE_PATH), 24, 48);
     player.move({ WIDTH / 2.0f, HEIGHT / 2.0f });
 
     // NPC Setup
     
     // Frank
 
-    entities.push_back(std::make_unique<NPC>(LoadTexture(NPC_1_TEXTURE_PATH), Vector2{ 1 * CELL_SIZE * SCALE, 1 * CELL_SIZE * SCALE }));
+    entities.push_back(std::make_unique<NPC>(LoadTexture(NPC_1_TEXTURE_PATH), Vector2{ 1 * CELL_SIZE * SCALE, 1 * CELL_SIZE * SCALE }, 24, 48));
 
     if (NPC* frank = dynamic_cast<NPC*>(entities.back().get())) {
         frank->addWaypoint({ 10 * CELL_SIZE * SCALE, 1 * CELL_SIZE * SCALE });
         frank->addWaypoint({ 10 * CELL_SIZE * SCALE, 5 * CELL_SIZE * SCALE });
         frank->addWaypoint({ 1 * CELL_SIZE * SCALE, 5 * CELL_SIZE * SCALE });
     }
+
+    // Game Objects
+
+    entities.push_back(std::make_unique<Tree>(LoadTexture(TREE_1_TEXTURE_PATH), Vector2{ 10 * CELL_SIZE * SCALE, 10 * CELL_SIZE * SCALE }, 48, 48));
+    entities.push_back(std::make_unique<Tree>(LoadTexture(TREE_1_TEXTURE_PATH), Vector2{ 10 * CELL_SIZE * SCALE, 12 * CELL_SIZE * SCALE }, 48, 48));
+    entities.push_back(std::make_unique<Tree>(LoadTexture(TREE_1_TEXTURE_PATH), Vector2{ 12 * CELL_SIZE * SCALE, 12 * CELL_SIZE * SCALE }, 48, 48));
 
     // Camera Setup
     
@@ -67,6 +75,11 @@ void Game::init() {
 
     editMode = false;
     selected = -1;
+
+    // Other
+
+    largeShadow = LoadTexture(LARGE_SHADOW_TEXTURE_PATH);
+    largeShadow = LoadTexture(SMALL_SHADOW_TEXTURE_PATH);
 
     // tileMap.load(MAP_PATH);
 }
@@ -186,6 +199,7 @@ void Game::update() {
     mouse.draw();
 
     // Display all NPCs within visible chunks
+
     for (std::unique_ptr<Entity>& entity : entities) {
         if (Vector2Distance(
             {

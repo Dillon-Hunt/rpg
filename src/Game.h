@@ -18,6 +18,8 @@ class Game {
         Mouse mouse;
         bool editMode;
         int selected;
+        Texture2D largeShadow;
+        Texture2D smallShadow;
 
     public:
         /* Constructor for the Game class

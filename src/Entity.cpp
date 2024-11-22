@@ -4,8 +4,10 @@
 
 #include "Config.h"
 
-void Entity::setTexture(const Texture2D& newTexture) {
-    texture = newTexture;
+void Entity::setTexture(const Texture2D& t, int w, int h) {
+    texture = t;
+    width = w;
+    height = h;
 }
 
 void Entity::move(const Vector2& p) {
@@ -61,6 +63,13 @@ Rectangle Entity::getCollisionShape() const {
     };
 }
 
+Vector2 Entity::getOrigin() const {
+    return {
+        width / 2.0f * SCALE,
+        height * SCALE
+    };
+}
+
 void Entity::draw() const {
     if (SHOW_COLLISION_SHAPE) {
         DrawRectangleRec(getCollisionShape(), RED);
@@ -71,19 +80,16 @@ void Entity::draw() const {
         {
             0,
             0,
-            24,
-            48
+            (float) width,
+            (float) height
         },
         {
             position.x,
             position.y,
-            24 * SCALE,
-            48 * SCALE
+            width * SCALE,
+            height * SCALE
         },
-        {
-            12.0f * SCALE,
-            48.0f * SCALE
-        },
+        getOrigin(),
         0.0f,
         WHITE
     );

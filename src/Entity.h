@@ -9,13 +9,15 @@ class Entity {
     protected:
         Texture2D texture;
         Vector2 position;
+        int width;
+        int height;
 
     public:
         Entity() {};
 
         Entity(const Texture& texture, const Vector2& position) : texture(texture), position(position) {};
 
-        void setTexture(const Texture2D& newTexture);
+        void setTexture(const Texture2D& t, int w, int h);
 
         void move(const Vector2& position);
 
@@ -35,7 +37,9 @@ class Entity {
 
         int getChunkY() const;
 
-        Rectangle getCollisionShape() const;
+        virtual Rectangle getCollisionShape() const;
+        
+        virtual Vector2 getOrigin() const;
 
         void draw() const;
 

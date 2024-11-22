@@ -48,6 +48,13 @@
 #define NPC_SPEED 0.5f * BASE_FPS / FPS
 #define NPC_1_TEXTURE_PATH "resources/npc1.png"
 
+// Game Objects
+#define TREE_1_TEXTURE_PATH "resources/tree1.png"
+#define TREE_2_TEXTURE_PATH "resources/tree2.png"
+
+#define LARGE_SHADOW_TEXTURE_PATH "resources/tree-shadow.png"
+#define SMALL_SHADOW_TEXTURE_PATH "resources/npc-shadow.png"
+
 // Map
 
 #define MAP_PATH "resources/map.txt"
