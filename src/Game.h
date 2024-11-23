@@ -15,7 +15,6 @@ class Game {
         Camera2D camera;
         Entity player;
         std::vector<std::unique_ptr<Entity>> entities;
-        std::map<std::pair<int, int>, std::unique_ptr<GameObject>> gameObjects;
         Mouse mouse;
         bool editMode;
         int selected;
@@ -34,6 +33,11 @@ class Game {
          *
          */
         void init();
+
+        /* Places a new game object in the relevant chunk
+         *
+         */
+        void placeGameObject(int texture);
 
         /* Check for inputs
          */

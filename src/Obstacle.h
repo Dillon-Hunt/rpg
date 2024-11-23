@@ -5,12 +5,12 @@
 
 class Obstacle : public GameObject {
     private:
-        int index;
+        int key;
 
     public:
         Obstacle() {};
 
-        Obstacle(const Texture& texture, const Vector2& position, int index, int width, int height) : GameObject(texture, position, width, height), index(index) {};
+        Obstacle(const Texture& texture, const Vector2& position, int key) : GameObject(texture, position), key(key) {};
 
         Rectangle getCollisionShape() const override;
 

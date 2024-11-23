@@ -13,7 +13,7 @@ class NPC : public Entity {
     public:
         NPC() : waypoint(0) {};
 
-        NPC(const Texture& texture, const Vector2& position, int width, int height) : Entity(texture, position, width, height), waypoint(0) {
+        NPC(const Texture& texture, const Vector2& position) : Entity(texture, position), waypoint(0) {
             waypoints.push_back(position);
         };
 

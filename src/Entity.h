@@ -7,7 +7,7 @@ class Entity : public GameObject {
     public:
         Entity() {};
 
-        Entity(const Texture& texture, const Vector2& position, int width, int height) : GameObject(texture, position, width, height) {};
+        Entity(const Texture& texture, const Vector2& position) : GameObject(texture, position) {};
 
         void move(const Vector2& position);
 

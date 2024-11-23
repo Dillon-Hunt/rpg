@@ -43,6 +43,11 @@
 
 #define PLAYER_TEXTURE_PATH "resources/player.png"
 
+// Game Objects
+
+#define NONE -1
+#define FENCE 0
+
 // NPC
 
 #define NPC_SPEED 0.5f * BASE_FPS / FPS

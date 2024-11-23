@@ -8,7 +8,6 @@
 #include "Config.h"
 
 #include "NPC.h"
-#include "Obstacle.h"
 
 #include <iostream>
 #include <memory>
@@ -25,90 +24,20 @@ void Game::init() {
     
     // Player Setup
     
-    player.setTexture(LoadTexture(PLAYER_TEXTURE_PATH), 24, 48);
+    player.setTexture(LoadTexture(PLAYER_TEXTURE_PATH));
     player.move({ WIDTH / 2.0f, HEIGHT / 2.0f });
 
     // NPC Setup
     
     // Frank
 
-    entities.push_back(std::make_unique<NPC>(LoadTexture(NPC_1_TEXTURE_PATH), Vector2{ 1 * CELL_SIZE * SCALE, 1 * CELL_SIZE * SCALE }, 24, 48));
+    entities.push_back(std::make_unique<NPC>(LoadTexture(NPC_1_TEXTURE_PATH), Vector2{ 1 * CELL_SIZE * SCALE, 1 * CELL_SIZE * SCALE }));
 
     if (NPC* frank = dynamic_cast<NPC*>(entities.back().get())) {
         frank->addWaypoint({ 10 * CELL_SIZE * SCALE, 1 * CELL_SIZE * SCALE });
         frank->addWaypoint({ 10 * CELL_SIZE * SCALE, 5 * CELL_SIZE * SCALE });
         frank->addWaypoint({ 1 * CELL_SIZE * SCALE, 5 * CELL_SIZE * SCALE });
     }
-
-    // Game Objects
-
-    gameObjects.emplace(
-        std::make_pair(
-            10,
-            10
-        ),
-        std::make_unique<Obstacle>(
-            LoadTexture(FENCE_TEXTURE_PATH),
-            Vector2{
-                10 * CELL_SIZE * SCALE,
-                10 * CELL_SIZE * SCALE
-            },
-            16,
-            120,
-            96
-        )
-    );
-
-    gameObjects.emplace(
-        std::make_pair(
-            11,
-            10
-        ),
-        std::make_unique<Obstacle>(
-            LoadTexture(FENCE_TEXTURE_PATH),
-            Vector2{
-                11 * CELL_SIZE * SCALE,
-                10 * CELL_SIZE * SCALE
-            },
-            18,
-            120,
-            96
-        )
-    );
-
-    gameObjects.emplace(
-        std::make_pair(
-            10,
-            9
-        ),
-        std::make_unique<Obstacle>(
-            LoadTexture(FENCE_TEXTURE_PATH),
-            Vector2{
-                10 * CELL_SIZE * SCALE,
-                9 * CELL_SIZE * SCALE
-            },
-            1,
-            120,
-            96
-        )
-    );
-
-    gameObjects.emplace(
-        std::make_pair(
-            11,
-            9
-        ),
-        std::make_unique<Obstacle>(
-            LoadTexture(FENCE_TEXTURE_PATH),
-            Vector2{
-                11 * CELL_SIZE * SCALE,
-                9 * CELL_SIZE * SCALE
-            },
-            3,
-            120,
-            96
-        )
-    );
 
     // Camera Setup
     
@@ -146,6 +75,10 @@ void Game::init() {
     largeShadow = LoadTexture(SMALL_SHADOW_TEXTURE_PATH);
 
     // tileMap.load(MAP_PATH);
+}
+
+void Game::placeGameObject(int texture) {
+    chunks.at(std::make_pair(mouse.getChunkX(), mouse.getChunkY()))->place(mouse.getRelativeX(), mouse.getRelativeY(), texture);
 }
 
 void Game::handle_input() {
@@ -203,6 +136,11 @@ void Game::handle_input() {
             mouse.select();
         }
     }
+    
+    if (mouse.isSelected() && IsKeyPressed(KEY_P)) {
+        placeGameObject(FENCE);
+        mouse.deselect();
+    }
 
     // Determine direction vector
     
@@ -219,7 +157,7 @@ void Game::handle_input() {
     player.slide(Vector2{ direction.x, 0.0f } * SCALE * SPEED);
 
     // Move player back if movement caused collision
-    if (player.checkCollisions<Entity>(entities) || player.checkCollisions<GameObject>(gameObjects)) {
+    if (player.checkCollisions<Entity>(entities)) {
         player.slide(Vector2{ -direction.x, 0.0f } * SCALE * SPEED);
     }
 
@@ -227,7 +165,7 @@ void Game::handle_input() {
     player.slide(Vector2{ 0.0f, direction.y } * SCALE * SPEED);
 
     // Move player back if movement caused collision
-    if (player.checkCollisions<Entity>(entities) || player.checkCollisions<GameObject>(gameObjects)) {
+    if (player.checkCollisions<Entity>(entities)) {
         player.slide(Vector2{ 0.0f, -direction.y } * SCALE * SPEED);
     }
 
@@ -241,6 +179,8 @@ void Game::handle_input() {
 }
 
 void Game::update() {
+    //std::cout << GetMousePosition().x << " " << GetMousePosition().y << std::endl;
+
     BeginDrawing();
 
     ClearBackground(WHITE);
@@ -288,23 +228,6 @@ void Game::update() {
         }
     }
 
-    // Display all Game Objects
-
-    for (auto& object : gameObjects) {
-        if (Vector2Distance(
-            {
-                (float) object.second->getChunkX(),
-                (float) object.second->getChunkY()
-            },
-            {
-                (float) player.getChunkX(),
-                (float) player.getChunkY()
-            }
-        ) <= 1) {
-            object.second->draw();
-        }
-    }
-
     // Draw Player
     player.draw();
 
@@ -339,7 +262,7 @@ void Game::update() {
 
         y += TEXT_SEPARATION;
 
-        int key = chunks.at(std::make_pair(mouse.getChunkX(), mouse.getChunkY()))->getKey(mouse.getRelativeX(), mouse.getRelativeY());
+        int key = chunks.at(std::make_pair(mouse.getChunkX(), mouse.getChunkY()))->getTileTexture(mouse.getRelativeX(), mouse.getRelativeY());
 
         std::string tile = "";
 
@@ -371,6 +294,10 @@ void Game::cleanup() {
     // Unload all textures
     pallet.unloadTextures();
     player.unloadTexture();
+
+    for (auto& pair : chunks) {
+        pair.second->unloadTextures();
+    }
 
     for (std::unique_ptr<Entity>& entity : entities) {
         entity->unloadTexture();

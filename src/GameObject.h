@@ -10,15 +10,13 @@ class GameObject {
     protected:
         Texture2D texture;
         Vector2 position;
-        int width;
-        int height;
 
     public:
         GameObject() {};
 
-        GameObject(const Texture& texture, const Vector2& position, int width, int height) : texture(texture), position(position), width(width), height(height) {};
+        GameObject(const Texture& texture, const Vector2& position) : texture(texture), position(position) {};
 
-        void setTexture(const Texture2D& t, int w, int h);
+        void setTexture(const Texture2D& t);
 
         template <typename T>
         bool checkCollision(const T& entity) const {
@@ -64,6 +62,8 @@ class GameObject {
         virtual Rectangle getCollisionShape() const;
         
         virtual Vector2 getOrigin() const;
+
+        virtual Rectangle getDestinationShape() const;
 
         virtual void draw() const;
 

@@ -156,8 +156,8 @@ void Pallet::drawTile(int x, int y, const std::array<int, 4>& keys) const {
             CELL_SIZE
         },
         {
-            x * CELL_SIZE * SCALE,
-            y * CELL_SIZE * SCALE,
+            (x - 0.5f) * CELL_SIZE * SCALE,
+            (y - 0.5f) * CELL_SIZE * SCALE,
             CELL_SIZE * SCALE,
             CELL_SIZE * SCALE
         },

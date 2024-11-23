@@ -2,15 +2,17 @@
 
 #include "Config.h"
 
+#include <iostream>
+
 Rectangle Obstacle::getCollisionShape() const {
-    if (index == 6 || index == 10 || index == 15) return {
+    if (key == 6 || key == 10 || key == 15) return {
         position.x + CELL_SIZE * SCALE / 2.0f,
         position.y + CELL_SIZE * SCALE / 2.0f,
         CELL_SIZE * SCALE / 2.0f,
         CELL_SIZE * SCALE
     };
 
-    if (index == 8 || index == 14 || index == 19) return {
+    if (key == 8 || key == 14 || key == 19) return {
         position.x + CELL_SIZE * SCALE,
         position.y + CELL_SIZE * SCALE / 2.0f,
         CELL_SIZE * SCALE / 2.0f,
@@ -33,6 +35,7 @@ Vector2 Obstacle::getOrigin() const {
 }
 
 void Obstacle::draw() const {
+    std::cout << position.x << " " << position.y << std::endl;
     if (SHOW_COLLISION_SHAPE) {
         DrawRectangleRec(getCollisionShape(), RED);
     }
@@ -40,8 +43,8 @@ void Obstacle::draw() const {
     DrawTexturePro(
         texture,
         {
-            (float) CELL_SIZE * (int) (index % (width / CELL_SIZE)),
-            (float) CELL_SIZE * (int) (index / (width / CELL_SIZE)),
+            (float) CELL_SIZE * (int) (key % (texture.width / CELL_SIZE)),
+            (float) CELL_SIZE * (int) (key / (texture.width / CELL_SIZE)),
             CELL_SIZE,
             CELL_SIZE
         },

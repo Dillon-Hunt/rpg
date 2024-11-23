@@ -5,7 +5,7 @@
 
 class Tree : public GameObject {
     public:
-        Tree(const Texture& texture, const Vector2& position, int width, int height) : GameObject(texture, position, width, height) {};
+        Tree(const Texture& texture, const Vector2& position) : GameObject(texture, position) {};
 
         Rectangle getCollisionShape() const override;
 

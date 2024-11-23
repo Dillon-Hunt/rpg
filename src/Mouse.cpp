@@ -41,8 +41,8 @@ int Mouse::getChunkY() const {
 void Mouse::updatePosition(int offsetX, int offsetY) {
     Vector2 position = GetMousePosition();
 
-    position.x += offsetX - CELL_SIZE * SCALE / 2.0f;
-    position.y += offsetY - CELL_SIZE * SCALE / 2.0f;
+    position.x += offsetX;
+    position.y += offsetY;
 
     x = (position.x) / CELL_SIZE / SCALE;
     y = (position.y) / CELL_SIZE / SCALE;
@@ -54,8 +54,8 @@ void Mouse::updatePosition(int offsetX, int offsetY) {
 void Mouse::draw() const {
     DrawRectangleLinesEx(
         {
-            (x + 0.5f) * CELL_SIZE * SCALE,
-            (y +0.5f) * CELL_SIZE * SCALE, 
+            x * CELL_SIZE * SCALE,
+            y * CELL_SIZE * SCALE, 
             width * CELL_SIZE * SCALE,
             height * CELL_SIZE * SCALE
         },

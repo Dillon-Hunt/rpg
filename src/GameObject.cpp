@@ -2,10 +2,8 @@
 
 #include "Config.h"
 
-void GameObject::setTexture(const Texture2D& t, int w, int h) {
+void GameObject::setTexture(const Texture2D& t) {
     texture = t;
-    width = w;
-    height = h;
 }
 
 Vector2 GameObject::getPosition() const {
@@ -13,11 +11,11 @@ Vector2 GameObject::getPosition() const {
 }
 
 int GameObject::getX() const {
-    return position.x / (CELL_SIZE * SCALE) - 0.5f - (position.x - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
+    return position.x / (CELL_SIZE * SCALE) - (position.x - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
 }
 
 int GameObject::getY() const {
-    return position.y / (CELL_SIZE * SCALE) - 0.5f - (position.y - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
+    return position.y / (CELL_SIZE * SCALE) - (position.y - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
 }
 
 int GameObject::getChunkX() const {
@@ -30,17 +28,26 @@ int GameObject::getChunkY() const {
 
 Rectangle GameObject::getCollisionShape() const {
     return {
-        position.x - 8 * SCALE,
-        position.y - 12 * SCALE,
-        16 * SCALE,
-        12 * SCALE
+        position.x - (texture.width * SCALE),
+        position.y - (texture.height * SCALE),
+        texture.width * SCALE,
+        texture.height * SCALE
+    };
+}
+
+Rectangle GameObject::getDestinationShape() const {
+    return {
+        position.x - (texture.width * SCALE),
+        position.y - (texture.height * SCALE),
+        texture.width * SCALE,
+        texture.height * SCALE
     };
 }
 
 Vector2 GameObject::getOrigin() const {
     return {
-        width / 2.0f * SCALE,
-        height * SCALE
+        0.0f,
+        0.0f
     };
 }
 
@@ -54,15 +61,10 @@ void GameObject::draw() const {
         {
             0,
             0,
-            (float) width,
-            (float) height
+            (float) texture.width,
+            (float) texture.height
         },
-        {
-            position.x,
-            position.y,
-            width * SCALE,
-            height * SCALE
-        },
+        getDestinationShape(),
         getOrigin(),
         0.0f,
         WHITE
