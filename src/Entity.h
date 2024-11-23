@@ -12,6 +12,8 @@ class Entity : public GameObject {
         void move(const Vector2& position);
 
         void slide(const Vector2& delta);
+        
+        Rectangle getCollisionShape() const override;
 
         void update(const GameObject& /*player*/) override {};
 };

@@ -14,6 +14,7 @@
 // HUD
 
 #define TEXT_SEPARATION 20
+#define CURSOR_TEXTURE_PATH "resources/cursor.png"
 
 // Pallet
 
@@ -68,6 +69,6 @@
 
 // Debug
 
-#define SHOW_COLLISION_SHAPE true
+#define SHOW_COLLISION_SHAPE false
 
 #endif // CONFIG_H

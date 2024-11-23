@@ -2,6 +2,10 @@
 
 #include "Config.h"
 
+void Mouse::setTexture(Texture2D t) {
+    texture = t;
+}
+
 void Mouse::select() {
     selected = true;
 }
@@ -51,7 +55,9 @@ void Mouse::updatePosition(int offsetX, int offsetY) {
     if (position.y < 0) y--;
 }
 
-void Mouse::draw() const {
+void Mouse::draw(Vector2 offset) const {
+    Vector2 position = GetMousePosition();
+
     DrawRectangleLinesEx(
         {
             x * CELL_SIZE * SCALE,
@@ -61,5 +67,16 @@ void Mouse::draw() const {
         },
         2.0f,
         selected ? RED : color
+    );
+
+    DrawTextureEx(
+        texture,
+        {
+            position.x + offset.x - texture.width * SCALE / 2.0f,
+            position.y + offset.y - texture.height * SCALE / 2.0f
+        },
+        0.0f,
+        SCALE,
+        WHITE
     );
 }

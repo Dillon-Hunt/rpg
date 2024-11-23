@@ -21,6 +21,10 @@ void Game::init() {
     InitWindow(WIDTH, HEIGHT, "RPG Game");
     SetTargetFPS(FPS);
     SetExitKey(0);
+
+    // Mouse Setup
+    HideCursor();
+    mouse.setTexture(LoadTexture(CURSOR_TEXTURE_PATH));
     
     // Player Setup
     
@@ -153,20 +157,60 @@ void Game::handle_input() {
 
     direction = Vector2Normalize(direction);
 
-    // Move Player
-    player.slide(Vector2{ direction.x, 0.0f } * SCALE * SPEED);
+    // Check if player is inside object (if so override collision detection)
+    bool insideObject = false;
 
-    // Move player back if movement caused collision
-    if (player.checkCollisions<Entity>(entities)) {
-        player.slide(Vector2{ -direction.x, 0.0f } * SCALE * SPEED);
+    if (
+        player.checkCollisions<Entity>(entities) ||
+        chunks.at(
+            std::make_pair(
+                player.getChunkX(),
+                player.getChunkY()
+            )
+        )->checkCollision(player)
+    ) {
+        insideObject = true;
     }
 
-    // Move Player
-    player.slide(Vector2{ 0.0f, direction.y } * SCALE * SPEED);
 
-    // Move player back if movement caused collision
-    if (player.checkCollisions<Entity>(entities)) {
-        player.slide(Vector2{ 0.0f, -direction.y } * SCALE * SPEED);
+    if (insideObject) {
+
+        // Move Player
+        player.slide(Vector2{ direction.x, direction.y } * SCALE * SPEED);
+
+    } else {
+
+        // Move Player
+        player.slide(Vector2{ direction.x, 0.0f } * SCALE * SPEED);
+
+        // Move player back if movement caused collision
+        if (
+            player.checkCollisions<Entity>(entities) ||
+            chunks.at(
+                std::make_pair(
+                    player.getChunkX(),
+                    player.getChunkY()
+                )
+            )->checkCollision(player)
+        ) {
+            player.slide(Vector2{ -direction.x, 0.0f } * SCALE * SPEED);
+        }
+
+        // Move Player
+        player.slide(Vector2{ 0.0f, direction.y } * SCALE * SPEED);
+
+        // Move player back if movement caused collision
+        if (
+            player.checkCollisions<Entity>(entities) ||
+            chunks.at(
+                std::make_pair(
+                    player.getChunkX(),
+                    player.getChunkY()
+                )
+            )->checkCollision(player)
+        ) {
+            player.slide(Vector2{ 0.0f, -direction.y } * SCALE * SPEED);
+        }
     }
 
     // Move camera
@@ -201,14 +245,23 @@ void Game::update() {
     }
 
     // Display 9 chunks around player
+    
+    // Tiles
     for (int x = -1; x <= 1; x++) {
         for (int y = -1; y <= 1; y++) {
-            chunks.at(std::make_pair(x + player.getChunkX(), y + player.getChunkY()))->draw();
+            chunks.at(std::make_pair(x + player.getChunkX(), y + player.getChunkY()))->drawTiles();
+        }
+    }
+
+    // GameObjects
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+            chunks.at(std::make_pair(x + player.getChunkX(), y + player.getChunkY()))->drawGameObjects();
         }
     }
 
     // Draw mouse selector
-    mouse.draw();
+    mouse.draw(camera.target - camera.offset);
 
     // Display all NPCs within visible chunks
 

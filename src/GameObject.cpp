@@ -11,11 +11,11 @@ Vector2 GameObject::getPosition() const {
 }
 
 int GameObject::getX() const {
-    return position.x / (CELL_SIZE * SCALE) - (position.x - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
+    return (position.x - texture.width * SCALE / 2.0f) / (CELL_SIZE * SCALE) - (position.x < 0 ? 1 : 0);
 }
 
 int GameObject::getY() const {
-    return position.y / (CELL_SIZE * SCALE) - (position.y - CELL_SIZE * SCALE * 0.5f < 0 ? 1 : 0);
+    return position.y / (CELL_SIZE * SCALE) - (position.y < 0 ? 1 : 0);
 }
 
 int GameObject::getChunkX() const {
