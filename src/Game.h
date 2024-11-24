@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "Chunk.h"
+#include "Enemy.h"
 #include "Entity.h"
 #include "Mouse.h"
 
@@ -15,6 +16,7 @@ class Game {
         Camera2D camera;
         Entity player;
         std::vector<std::unique_ptr<Entity>> entities;
+        std::vector<std::unique_ptr<Enemy>> enemies;
         Mouse mouse;
         bool editMode;
         int selected;

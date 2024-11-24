@@ -2,6 +2,7 @@
 #define NPC_H
 
 #include "Entity.h"
+#include "Chunk.h"
 
 #include <vector>
 
@@ -19,7 +20,7 @@ class NPC : public Entity {
 
         void addWaypoint(const Vector2& w);
 
-        void update(const GameObject& player) override;
+        void update(const std::map<std::pair<int, int>, std::unique_ptr<Chunk>>& /*chunks*/, const Entity& /*player*/) override;
 };
 
 #endif // NPC_H

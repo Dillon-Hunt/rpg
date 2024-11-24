@@ -79,10 +79,42 @@ void Game::init() {
     largeShadow = LoadTexture(SMALL_SHADOW_TEXTURE_PATH);
 
     // tileMap.load(MAP_PATH);
+
+    enemies.push_back(
+        std::make_unique<Enemy>(
+            LoadTexture("resources/blob.png"),
+            Vector2{ 0.0f, 0.0f }
+        )
+    );
+
+    enemies.push_back(
+        std::make_unique<Enemy>(
+            LoadTexture("resources/blob.png"),
+            Vector2{ 0.0f, 0.0f }
+        )
+    );
+
+    enemies.push_back(
+        std::make_unique<Enemy>(
+            LoadTexture("resources/blob.png"),
+            Vector2{ 0.0f, 0.0f }
+        )
+    );
 }
 
 void Game::placeGameObject(int texture) {
-    chunks.at(std::make_pair(mouse.getChunkX(), mouse.getChunkY()))->place(mouse.getRelativeX(), mouse.getRelativeY(), texture);
+    chunks.at(
+        std::make_pair(
+            mouse.getChunkX(),
+            mouse.getChunkY()
+        )
+    )
+    ->
+    place(
+        mouse.getRelativeX(),
+        mouse.getRelativeY(),
+        texture
+    );
 }
 
 void Game::handle_input() {
@@ -141,9 +173,14 @@ void Game::handle_input() {
         }
     }
     
-    if (mouse.isSelected() && IsKeyPressed(KEY_P)) {
-        placeGameObject(FENCE);
-        mouse.deselect();
+    if (mouse.isSelected()) {
+        if (IsKeyPressed(KEY_P) && IsKeyDown(KEY_LEFT_SHIFT)) {
+            placeGameObject(NONE);
+            mouse.deselect();
+        } else if (IsKeyPressed(KEY_P)) {
+            placeGameObject(FENCE);
+            mouse.deselect();
+        }
     }
 
     // Determine direction vector
@@ -160,18 +197,20 @@ void Game::handle_input() {
     // Check if player is inside object (if so override collision detection)
     bool insideObject = false;
 
-    if (
-        player.checkCollisions<Entity>(entities) ||
-        chunks.at(
-            std::make_pair(
-                player.getChunkX(),
-                player.getChunkY()
-            )
-        )->checkCollision(player)
-    ) {
-        insideObject = true;
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+            if (
+                chunks.at(
+                    std::make_pair(
+                        player.getChunkX() + x,
+                        player.getChunkY() + y
+                    )
+                )->checkCollision(player)
+            ) {
+                insideObject = true;
+            }
+        }
     }
-
 
     if (insideObject) {
 
@@ -184,15 +223,24 @@ void Game::handle_input() {
         player.slide(Vector2{ direction.x, 0.0f } * SCALE * SPEED);
 
         // Move player back if movement caused collision
-        if (
-            player.checkCollisions<Entity>(entities) ||
-            chunks.at(
-                std::make_pair(
-                    player.getChunkX(),
-                    player.getChunkY()
-                )
-            )->checkCollision(player)
-        ) {
+        bool collision = false;
+
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                if (
+                    chunks.at(
+                        std::make_pair(
+                            player.getChunkX() + x,
+                            player.getChunkY() + y
+                        )
+                    )->checkCollision(player)
+                ) {
+                    collision = true;
+                }
+            }
+        }
+
+        if (collision) {
             player.slide(Vector2{ -direction.x, 0.0f } * SCALE * SPEED);
         }
 
@@ -200,15 +248,24 @@ void Game::handle_input() {
         player.slide(Vector2{ 0.0f, direction.y } * SCALE * SPEED);
 
         // Move player back if movement caused collision
-        if (
-            player.checkCollisions<Entity>(entities) ||
-            chunks.at(
-                std::make_pair(
-                    player.getChunkX(),
-                    player.getChunkY()
-                )
-            )->checkCollision(player)
-        ) {
+        collision = false;
+
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                if (
+                    chunks.at(
+                        std::make_pair(
+                            player.getChunkX() + x,
+                            player.getChunkY() + y
+                        )
+                    )->checkCollision(player)
+                ) {
+                    collision = true;
+                }
+            }
+        }
+
+        if (collision) {
             player.slide(Vector2{ 0.0f, -direction.y } * SCALE * SPEED);
         }
     }
@@ -276,9 +333,14 @@ void Game::update() {
                 (float) player.getChunkY()
             }
         ) <= 1) {
-            entity->update(player);
+            entity->update(chunks, player);
             entity->draw();
         }
+    }
+
+    for (std::unique_ptr<Enemy>& enemy : enemies) {
+        enemy->update(chunks, player);
+        enemy->draw();
     }
 
     // Draw Player
@@ -354,6 +416,10 @@ void Game::cleanup() {
 
     for (std::unique_ptr<Entity>& entity : entities) {
         entity->unloadTexture();
+    }
+
+    for (std::unique_ptr<Enemy>& enemy : enemies) {
+        enemy->unloadTexture();
     }
 
     CloseWindow();

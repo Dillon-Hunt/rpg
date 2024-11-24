@@ -1,5 +1,7 @@
 #include "Chunk.h"
 
+#include "Entity.h"
+
 #include <iostream>
 
 // void Chunk::load(const char* path) {

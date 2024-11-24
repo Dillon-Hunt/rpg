@@ -4,6 +4,7 @@
 #include "Config.h"
 
 #include "Pallet.h"
+#include "Entity.h"
 
 #include <map>
 
@@ -58,8 +59,7 @@ class Chunk {
 
         void drawGameObjects() const;
 
-        template <typename T>
-        bool checkCollision(const T& entity) const {
+        bool checkCollision(const Entity& entity) const {
             for (int col = 0; col < CHUNK_SIZE; col++) {
                 for (int row = 0; row < CHUNK_SIZE; row++) {
                     if (gameObjects[col][row] == NONE) continue;

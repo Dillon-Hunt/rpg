@@ -1,11 +1,11 @@
 #ifndef TREE_H
 #define TREE_H
 
-#include "GameObject.h"
+#include "Entity.h"
 
-class Tree : public GameObject {
+class Tree : public Entity {
     public:
-        Tree(const Texture& texture, const Vector2& position) : GameObject(texture, position) {};
+        Tree(const Texture& texture, const Vector2& position) : Entity(texture, position) {};
 
         Rectangle getCollisionShape() const override;
 

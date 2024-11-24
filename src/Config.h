@@ -54,6 +54,16 @@
 #define NPC_SPEED 0.5f * BASE_FPS / FPS
 #define NPC_1_TEXTURE_PATH "resources/npc1.png"
 
+// Enemy
+
+#define NO_SPAWN_RADIUS 1
+#define SPAWN_RADIUS 3
+#define ENTITY_MAXIMUM_WANDER_RADIUS 20
+#define ENEMY_IDLE_SPEED 0.4f
+#define ENEMY_TARGET_SPEED 0.6f
+#define ENEMY_DETECTION_RADIUS 4
+#define ENEMY_ESCAPE_RADIUS 6
+
 // Game Objects
 #define TREE_1_TEXTURE_PATH "resources/tree1.png"
 #define TREE_2_TEXTURE_PATH "resources/tree2.png"
@@ -69,6 +79,7 @@
 
 // Debug
 
-#define SHOW_COLLISION_SHAPE false
+#define SHOW_COLLISION_SHAPE true
+#define SHOW_ENEMY_TARGETING false
 
 #endif // CONFIG_H
