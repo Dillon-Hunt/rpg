@@ -112,7 +112,7 @@ endif
 # File sets
 # #############################################
 
-SOURCES := $(wildcard src/*.cpp)
+SOURCES := $(shell find src -name '*.cpp')
 
 OBJECTS := $(SOURCES:src/%.cpp=$(OBJDIR)/%.o)
 GENERATED := $(OBJECTS)
@@ -181,6 +181,7 @@ endif
 
 $(OBJDIR)/%.o: src/%.cpp | $(OBJDIR)
 	@echo Compiling $<
+	$(SILENT) mkdir -p $(dir $@)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 -include $(OBJECTS:%.o=%.d)
 ifneq (,$(PCH))

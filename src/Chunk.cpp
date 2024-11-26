@@ -1,165 +1,163 @@
 #include "Chunk.h"
 
-#include "Entity.h"
+#include "game-objects/objects/TiledObject.h"
+#include "Pallet.h"
 
-#include <iostream>
+#include <array>
 
-// void Chunk::load(const char* path) {
-//     std::ifstream file(path);
-//
-//     std::string line;
-//     int y = 0;
-//
-//     if (file.is_open()) {
-//         while (getline(file, line)) {
-//             int x = 0;
-//
-//             for (char& raw : line) {
-//                 int texture = raw - '0';
-//                 set(x, y, texture);
-//
-//                 x++;
-//             }
-//
-//             y++;
-//         }
-//
-//         file.close();
-//     } else {
-//         throw std::runtime_error("Could not open file: " + std::string(path));
-//     }
-// }
-
-void Chunk::unset(int col, int row) {
-    tileTexture[col][row] = 0;
+int Chunk::getTile(int x, int y) const {
+    if (x == -1) return chunks->at(std::make_pair(position.x - 1, position.y))->getTile(CHUNK_SIZE - 1, y);
+    if (x == CHUNK_SIZE) return chunks->at(std::make_pair(position.x + 1, position.y))->getTile(0, y);
+    if (y == -1) return chunks->at(std::make_pair(position.x, position.y - 1))->getTile(x, CHUNK_SIZE - 1);
+    if (y == CHUNK_SIZE) return chunks->at(std::make_pair(position.x, position.y + 1))->getTile(x, 0);
+    return tiles[x + y * CHUNK_SIZE];
 }
 
-int Chunk::getTileTexture(int col, int row) const {
-    if (col == -1) return chunks.at(std::make_pair(x - 1, y))->getTileTexture(CHUNK_SIZE - 1, row);
-    if (col == CHUNK_SIZE) return chunks.at(std::make_pair(x + 1, y))->getTileTexture(0, row);
-    if (row == -1) return chunks.at(std::make_pair(x, y - 1))->getTileTexture(col, CHUNK_SIZE - 1);
-    if (row == CHUNK_SIZE) return chunks.at(std::make_pair(x, y + 1))->getTileTexture(col, 0);
-    return tileTexture[col][row];
+std::optional<std::shared_ptr<Object>> Chunk::getObject(int x, int y) {
+    if (x == -1) return chunks->at(std::make_pair(position.x - 1, position.y))->getObject(CHUNK_SIZE - 1, y);
+    if (x == CHUNK_SIZE) return chunks->at(std::make_pair(position.x + 1, position.y))->getObject(0, y);
+    if (y == -1) return chunks->at(std::make_pair(position.x, position.y - 1))->getObject(x, CHUNK_SIZE - 1);
+    if (y == CHUNK_SIZE) return chunks->at(std::make_pair(position.x, position.y + 1))->getObject(x, 0);
+    auto it = objects.find(std::make_pair(x, y));
+
+    if (it == objects.end()) {
+        return std::nullopt;
+    }
+
+    return it->second;
 }
 
-int Chunk::getGameObjectTexture(int col, int row) const {
-    if (col == -1) return chunks.at(std::make_pair(x - 1, y))->getGameObjectTexture(CHUNK_SIZE - 1, row);
-    if (col == CHUNK_SIZE) return chunks.at(std::make_pair(x + 1, y))->getGameObjectTexture(0, row);
-    if (row == -1) return chunks.at(std::make_pair(x, y - 1))->getGameObjectTexture(col, CHUNK_SIZE - 1);
-    if (row == CHUNK_SIZE) return chunks.at(std::make_pair(x, y + 1))->getGameObjectTexture(col, 0);
-    return gameObjects[col][row];
+void Chunk::setTile(int x, int y, int id) {
+    tiles[x + y * CHUNK_SIZE] = id;
 }
 
-void Chunk::set(int col, int row, int texture) {
-    tileTexture[col][row] = texture;
+void Chunk::placeObject(int x, int y, int id) {
+    objects.emplace(std::make_pair(x, y), std::make_shared<TiledObject>(
+        id,
+        Vector2 {
+            (float) (position.x * CHUNK_SIZE + x) * TILE_SIZE,
+            (float) (position.y * CHUNK_SIZE + y) * TILE_SIZE
+        },
+        Pallet::get().getTexture(id),
+        chunks->at({ position.x, position.y })
+    ));
 }
 
-void Chunk::place(int col, int row, int texture) {
-    gameObjects[col][row] = texture;
+
+Texture2D Chunk::getTileTexture(const std::pair<int, int>& limits) const {
+    static const std::map<std::pair<int, int>, int> mapping = {
+        {{ GRASS, GRASS }, GRASS_DIRT },
+        {{ GRASS, DIRT }, GRASS_DIRT },
+        {{ GRASS, WATER }, GRASS_WATER },
+        {{ GRASS, GARDEN }, GRASS_GARDEN },
+        {{ GRASS, ROAD }, GRASS_ROAD },
+        {{ DIRT, WATER }, DIRT_WATER }
+    };
+
+    auto it = mapping.find(limits);
+
+    if (it == mapping.end()) {
+        return Pallet::get().getTexture(GRASS_DIRT);
+    }
+
+    return Pallet::get().getTexture(it->second);
+}
+
+Rectangle Chunk::getTileSource(const std::array<int, 4>& keys) const {
+    static const std::map<std::array<int, 4>, Vector2> mapping = {
+        {{ 0, 0, 0, 0 }, { 2, 1 }},
+        {{ 1, 1, 1, 1 }, { 0, 3 }},
+
+        {{ 0, 0, 0, 1 }, { 2, 2 }},
+        {{ 0, 0, 1, 0 }, { 3, 1 }},
+        {{ 0, 1, 0, 0 }, { 2, 0 }},
+        {{ 1, 0, 0, 0 }, { 1, 1 }},
+
+        {{ 1, 1, 0, 0 }, { 3, 0 }},
+        {{ 0, 0, 1, 1 }, { 1, 2 }},
+        {{ 0, 1, 1, 0 }, { 3, 2 }},
+        {{ 1, 0, 0, 1 }, { 1, 0 }},
+
+        {{ 1, 1, 1, 0 }, { 0, 0 }},
+        {{ 1, 1, 0, 1 }, { 1, 3 }},
+        {{ 1, 0, 1, 1 }, { 0, 2 }},
+        {{ 0, 1, 1, 1 }, { 3, 3 }},
+
+        {{ 0, 1, 0, 1 }, { 0, 1 }},
+        {{ 1, 0, 1, 0 }, { 2, 3 }},
+    };
+
+    Vector2 offset = mapping.at(keys);
+
+    return { offset.x * TILE_SIZE, offset.y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+
+}
+
+void Chunk::drawTile(int x, int y) const {
+    std::array<int, 4> keys = {
+        getTile(x - 1, y - 1),
+        getTile(x, y - 1),
+        getTile(x, y),
+        getTile(x - 1, y),
+    };
+
+    std::pair<int, int> limits = { 0, 0 };
+
+    limits.first = *std::min_element(keys.begin(), keys.end());
+    limits.second = *std::max_element(keys.begin(), keys.end());
+
+    if (limits.first == limits.second) {
+        limits.first = GRASS;
+    }
+
+    bool invalid = false;
+
+    for (int& key : keys) {
+        if (key == limits.first) {
+            key = 0;
+        } else if (key == limits.second) {
+            key = 1;
+        } else {
+            key = 0;
+            invalid = true;
+        }
+    }
+
+    DrawTexturePro(
+        getTileTexture(limits),
+        getTileSource(keys),
+        {
+            (float) (position.x * CHUNK_SIZE + x) * TILE_SIZE,
+            (float) (position.y * CHUNK_SIZE + y) * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+        },
+        {
+            TILE_SIZE,
+            TILE_SIZE
+        },
+        0.0f,
+        invalid ? RED : WHITE
+
+    );
 }
 
 void Chunk::drawTiles() const {
-    for (int col = 0; col < CHUNK_SIZE; col++) {
-        for (int row = 0; row < CHUNK_SIZE; row++) {
-            pallet.drawTile(
-                x * CHUNK_SIZE + col,
-                y * CHUNK_SIZE + row,
-                {
-                    getTileTexture(col - 1, row - 1),
-                    getTileTexture(col, row - 1),
-                    getTileTexture(col, row),
-                    getTileTexture(col - 1, row),
-                }
-            );
+    for (int x = 0; x < CHUNK_SIZE; x++) {
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            drawTile(x, y);
         }
     }
 }
 
-Vector2 Chunk::getGameObjectSourcePosition(const std::array<int, 4>& keys, int key) const {
-    static const std::map<std::array<int, 4>, Vector2> mapping = {
-        // NORTH, EAST, SOUTH, WEST
-        {{ NONE, NONE, NONE, NONE }, { 0, 0 }},
-        {{ NONE, NONE, NONE, 1 }, { 3, 0 }},
-        {{ NONE, NONE, 1, NONE }, { 0, 1 }},
-        {{ NONE, NONE, 1, 1 }, { 3, 1 }},
-        {{ NONE, 1, NONE, NONE }, { 1, 0 }},
-        {{ NONE, 1, NONE, 1 }, { 2, 0 }},
-        {{ NONE, 1, 1, NONE }, { 1, 1 }},
-        {{ NONE, 1, 1, 1 }, { 2, 1 }},
-        {{ 1, NONE, NONE, NONE }, { 0, 3 }},
-        {{ 1, NONE, NONE, 1 }, { 3, 3 }},
-        {{ 1, NONE, 1, NONE }, { 0, 2 }},
-        {{ 1, NONE, 1, 1 }, { 3, 2 }},
-        {{ 1, 1, NONE, NONE }, { 1, 3 }},
-        {{ 1, 1, NONE, 1 }, { 2, 3 }},
-        {{ 1, 1, 1, NONE }, { 1, 2 }},
-        {{ 1, 1, 1, 1 }, { 2, 2 }},
-    };
-
-    std::array<int, 4> masked = { NONE, NONE, NONE, NONE };
-
-    if (masked != keys) {
-        for (int i = 0; i < 4; i++) {
-            if (keys[i] == key) {
-                masked[i] = 1;
-            }
-        }
-    }
-
-    return mapping.find(masked)->second;
-}
-
-void Chunk::drawGameObjects() const {
-    for (int col = 0; col < CHUNK_SIZE; col++) {
-        for (int row = 0; row < CHUNK_SIZE; row++) {
-            if (gameObjects[col][row] == NONE) continue;
-
-            Vector2 sourceImagePosition = getGameObjectSourcePosition({
-                getGameObjectTexture(col, row - 1),
-                getGameObjectTexture(col + 1, row),
-                getGameObjectTexture(col, row + 1),
-                getGameObjectTexture(col - 1, row)
-            }, gameObjects[col][row]);
-
-            Collidable gameObject = availibleGameObjects.at(gameObjects[col][row]);
-
-            DrawTexturePro(
-                gameObject.texture,
-                {
-                    sourceImagePosition.x * CELL_SIZE,
-                    sourceImagePosition.y * CELL_SIZE,
-                    CELL_SIZE,
-                    CELL_SIZE
-                },
-                {
-                    (col + x * CHUNK_SIZE) * CELL_SIZE * SCALE,
-                    (row + y * CHUNK_SIZE) * CELL_SIZE * SCALE,
-                    CELL_SIZE * SCALE,
-                    CELL_SIZE * SCALE
-                },
-                {
-                    0.0f,
-                    0.0f
-                },
-                0.0f,
-                WHITE
-            );
-
-            if (SHOW_COLLISION_SHAPE) {
-                DrawRectangle(
-                    ((col + x * CHUNK_SIZE) * CELL_SIZE + gameObject.collider.x) * SCALE,
-                    ((row + y * CHUNK_SIZE) * CELL_SIZE + gameObject.collider.y) * SCALE,
-                    gameObject.collider.width * SCALE,
-                    gameObject.collider.height * SCALE,
-                    RED
-                );
-            }
-        }
+void Chunk::drawObjects() const {
+    for (auto pair : objects) {
+        pair.second->draw();
     }
 }
 
-void Chunk::unloadTextures() {
-    for (Collidable& gameObject : availibleGameObjects) {
-        UnloadTexture(gameObject.texture);
+void Chunk::update() {
+    for (auto pair : objects) {
+        pair.second->update();
     }
 }

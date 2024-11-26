@@ -1,82 +1,63 @@
 #include "Mouse.h"
 
-#include "Config.h"
+#include "raylib.h"
 
-void Mouse::setTexture(Texture2D t) {
-    texture = t;
+#include "utils/config.h"
+#include "EventManager.h"
+
+Point Mouse::getGridPosition() {
+    return position;
 }
 
-void Mouse::select() {
-    selected = true;
+void Mouse::update(Vector2& cameraOffset) {
+    if (IsKeyPressed(KEY_ONE)) {
+        type = TILE;
+        selectedTile = DIRT;
+    }
+
+    if (IsKeyPressed(KEY_TWO)) {
+        type = TILE;
+        selectedTile = WATER;
+    }
+
+    if (IsKeyPressed(KEY_THREE)) {
+        type = TILE;
+        selectedTile = GARDEN;
+    }
+
+    if (IsKeyPressed(KEY_FOUR)) {
+        type = TILE;
+        selectedTile = ROAD;
+    }
+
+    if (IsKeyPressed(KEY_FIVE)) {
+        type = OBJECT;
+        selectedTile = FENCE;
+    }
+
+    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+            EventManager::get().emitEvent(PLACE_TILE, std::pair<Point, int>(position, GRASS));
+        } else {
+            switch (type) {
+                case TILE: 
+                    EventManager::get().emitEvent(PLACE_TILE, std::pair<Point, int>(position, selectedTile));
+                    break;
+                case OBJECT:
+                    EventManager::get().emitEvent(PLACE_OBJECT, std::pair<Point, int>(position, selectedTile));
+                    break;
+                case ENTITY:
+                    break;
+            }
+        }
+    }
+
+    Vector2 v = GetMousePosition();
+    position = Vector2ToGridPosition(Vector2 { (v.x - cameraOffset.x) / SCALE, (v.y - cameraOffset.y) / SCALE });
 }
 
-void Mouse::deselect() {
-    selected = false;
-}
+void Mouse::draw() const {
+    Vector2 v = GridPositionToVector2(position);
+    DrawRectangleLines(v.x - TILE_SIZE / 2.0f, v.y - TILE_SIZE / 2.0f, TILE_SIZE, TILE_SIZE, BLUE);
 
-bool Mouse::isSelected() const {
-    return selected;
-}
-
-int Mouse::getX() const {
-    return x;
-}
-
-int Mouse::getY() const {
-    return y;
-}
-
-int Mouse::getRelativeX() const {
-    return getX() < 0 ? CHUNK_SIZE + getX() % CHUNK_SIZE : getX() % CHUNK_SIZE;
-}
-
-int Mouse::getRelativeY() const {
-    return getY() < 0 ? CHUNK_SIZE + getY() % CHUNK_SIZE : getY() % CHUNK_SIZE;
-}
-
-int Mouse::getChunkX() const {
-    return x / CHUNK_SIZE - (x < 0 ? 1 : 0);
-}
-
-int Mouse::getChunkY() const {
-    return y / CHUNK_SIZE - (y < 0 ? 1 : 0);
-}
-
-void Mouse::updatePosition(int offsetX, int offsetY) {
-    Vector2 position = GetMousePosition();
-
-    position.x += offsetX;
-    position.y += offsetY;
-
-    x = (position.x) / CELL_SIZE / SCALE;
-    y = (position.y) / CELL_SIZE / SCALE;
-
-    if (position.x < 0) x--;
-    if (position.y < 0) y--;
-}
-
-void Mouse::draw(Vector2 offset) const {
-    Vector2 position = GetMousePosition();
-
-    DrawRectangleLinesEx(
-        {
-            x * CELL_SIZE * SCALE,
-            y * CELL_SIZE * SCALE, 
-            width * CELL_SIZE * SCALE,
-            height * CELL_SIZE * SCALE
-        },
-        2.0f,
-        selected ? RED : color
-    );
-
-    DrawTextureEx(
-        texture,
-        {
-            position.x + offset.x - texture.width * SCALE / 2.0f,
-            position.y + offset.y - texture.height * SCALE / 2.0f
-        },
-        0.0f,
-        SCALE,
-        WHITE
-    );
 }

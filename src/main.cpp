@@ -1,14 +1,25 @@
 #include "Game.h"
+#include "Pallet.h"
+
+#include <memory>
 
 int main() {
-    Game game;
+    SetTraceLogLevel(LOG_ERROR); 
+    InitWindow(WIDTH, HEIGHT, "RPG Game");
+    SetTargetFPS(FPS);
+    SetExitKey(0);
 
-    while (!game.shouldClose()) {
-        game.handle_input();
-        game.update();
+    Pallet::get().load();
+
+    std::shared_ptr<Game> game = std::make_shared<Game>();
+
+    game->init();
+
+    while (!game->shouldClose()) {
+        game->update();
+        game->processCollisions();
+        game->draw();
     }
-
-    game.cleanup();
 
     return 0;
 }

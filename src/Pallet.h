@@ -4,35 +4,76 @@
 #include "raylib.h"
 
 #include <map>
+#include <memory>
+#include <string>
+#include <iostream>
 
-struct IntPair {
-    int min;
-    int max;
+// Tiles
+
+#define GRASS_DIRT 0
+#define GRASS_WATER 1
+#define GRASS_GARDEN 2
+#define DIRT_WATER 3
+#define GRASS_ROAD 4
+
+// Objects
+
+#define FENCE 5
+
+// Entities
+
+#define PLAYER 6
+#define NPC_1 7
+
+enum PalletType {
+    TILE,
+    OBJECT,
+    ENTITY
+};
+
+struct PalletEntry {
+    int id;
+    std::string name;
+    PalletType type;
+    Texture2D texture;
+    bool collidable;
+    Rectangle collider;
+
+    PalletEntry(int id, std::string name, PalletType type, Texture2D texture, bool collidable, Rectangle collider)
+        : id(id), name(name), type(type), texture(texture), collidable(collidable), collider(collider) {
+        std::cout << "Loading Texture: " << name << std::endl;
+    }
+
+    ~PalletEntry() {
+        std::cout << "Unloading texture: " << name << std::endl;
+        UnloadTexture(texture);
+    }
 };
 
 class Pallet {
     private:
-        std::map<int, std::pair<std::shared_ptr<Texture2D>, bool>> textures;
-        int countBase{ 0 };
+        std::map<int, std::shared_ptr<PalletEntry>> entries;
+
+        Pallet() = default;
+
+        ~Pallet() = default;
+
 
     public:
-        void loadTexture(int key, const char* path, bool isBase);
+        static Pallet& get() {
+            static Pallet instance;
+            return instance;
+        }
 
-        const std::shared_ptr<Texture2D> getTexture(int key) const;
+        void load();
 
-        int getTextureFromPallet() const;
+        void add(int id, std::shared_ptr<PalletEntry> entry);
 
-        void renderPallet() const;
-        
-        IntPair getMinMax(const std::array<int, 4>& keys) const;
+        Texture2D& getTexture(int id);
 
-        Vector2 getImageSourcePosition(const std::array<int, 4>& keys) const;
+        std::vector<std::shared_ptr<PalletEntry>> getTextures(PalletType type);
 
-        const std::shared_ptr<Texture2D> getTileTexture(const std::array<int, 4>& keys) const;
-
-        void drawTile(int x, int y, const std::array<int, 4>& keys) const;
-
-        void unloadTextures();
+        Rectangle& getColider(int id);
 };
 
 #endif // PALLET_H

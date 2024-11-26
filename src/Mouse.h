@@ -1,44 +1,27 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
-#include "raylib.h"
+#include "utils/config.h"
+#include "utils/grid.h"
+#include "Pallet.h"
 
 class Mouse {
     private:
-        int x;
-        int y;
-        int width;
-        int height;
-        Color color;
-        bool selected;
-        Texture2D texture;
+        Point position;
+        PalletType type;
+        int selectedTile;
 
     public:
-        Mouse(int x, int y, int width = 1, int height = 1, Color color = BLUE) : x(x), y(y), width(width), height(height), color(color), selected(false) {};
+        Mouse() : position({ 0, 0 }), selectedTile(DIRT) {}
 
-        void setTexture(Texture2D t);
+        Point getGridPosition();
 
-        void select();
+        void update(Vector2& cameraOffset);
 
-        void deselect();
+        void draw() const;
 
-        bool isSelected() const;
+        ~Mouse() {}
 
-        int getX() const;
-
-        int getY() const;
-
-        int getRelativeX() const;
-
-        int getRelativeY() const;
-
-        int getChunkX() const;
-
-        int getChunkY() const;
-
-        void updatePosition(int offsetX, int offsetY);
-
-        void draw(Vector2 offset) const;
 };
 
 #endif // MOUSE_H

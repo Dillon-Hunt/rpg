@@ -1,89 +1,48 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 
-#include "Config.h"
-
-#include "Pallet.h"
-#include "Entity.h"
+#include "utils/grid.h"
+#include "utils/config.h"
+#include "game-objects/Object.h"
 
 #include <map>
-
-struct Collidable {
-    Texture texture;
-    Rectangle collider;
-};
+#include <memory>
+#include <utility>
+#include <optional>
 
 class Chunk {
     private:
-        int x;
-        int y;
+        Point position;
+        int tiles[CHUNK_SIZE * CHUNK_SIZE];
+        std::shared_ptr<std::map<std::pair<int, int>, std::shared_ptr<Chunk>>> chunks;
+        std::map<std::pair<int, int>, std::shared_ptr<Object>> objects;
 
-        std::vector<Collidable> availibleGameObjects;
+        Texture2D getTileTexture(const std::pair<int, int>& limits) const;
 
-        int tileTexture[CHUNK_SIZE][CHUNK_SIZE];
-        int gameObjects[CHUNK_SIZE][CHUNK_SIZE];
-
-        std::map<std::pair<int, int>, std::unique_ptr<Chunk>>& chunks;
-        Pallet& pallet;
+        Rectangle getTileSource(const std::array<int, 4>& key) const;
 
     public:
-        Chunk(int x, int y, std::map<std::pair<int, int>, std::unique_ptr<Chunk>>& chunks, Pallet& pallet) : x(x), y(y), chunks(chunks), pallet(pallet) {
-            std::memset(tileTexture, GRASS_DIRT, sizeof(tileTexture));
-            std::memset(gameObjects, NONE, sizeof(gameObjects));
+        Chunk(Point position, std::shared_ptr<std::map<std::pair<int, int>, std::shared_ptr<Chunk>>> chunks) : position(position), chunks(chunks) {
+            std::memset(tiles, GRASS, sizeof(tiles));
+        }
 
-            availibleGameObjects.push_back({
-                LoadTexture(FENCE_TEXTURE_PATH),
-                { 6, 8, 12, 12 }
-            });
-        };
+        int getTile(int x, int y) const;
 
-        void renderPallet() const;
+        std::optional<std::shared_ptr<Object>> getObject(int x, int y);
 
-        int getTextureFromPallet() const;
+        void setTile(int x, int y, int id);
 
-        // void load(const char* path);
+        void placeObject(int x, int y, int id);
 
-        void unset(int x, int y);
-
-        int getTileTexture(int col, int row) const;
-
-        int getGameObjectTexture(int col, int row) const;
-
-        void set(int x, int y, int key);
-
-        void place(int x, int y, int key);
+        void drawTile(int x, int y) const;
 
         void drawTiles() const;
 
-        Vector2 getGameObjectSourcePosition(const std::array<int, 4>& keys, int key) const;
+        void drawObjects() const;
 
-        void drawGameObjects() const;
+        void update();
 
-        bool checkCollision(const Entity& entity) const {
-            for (int col = 0; col < CHUNK_SIZE; col++) {
-                for (int row = 0; row < CHUNK_SIZE; row++) {
-                    if (gameObjects[col][row] == NONE) continue;
-
-                    Collidable gameObject = availibleGameObjects.at(gameObjects[col][row]);
-
-                    if (CheckCollisionRecs(
-                        {
-                            ((col + x * CHUNK_SIZE) * CELL_SIZE + gameObject.collider.x) * SCALE,
-                            ((row + y * CHUNK_SIZE) * CELL_SIZE + gameObject.collider.y) * SCALE,
-                            gameObject.collider.width * SCALE,
-                            gameObject.collider.height * SCALE
-                        },
-                        entity.getCollisionShape())
-                    ) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        };
-
-        void unloadTextures();
+        ~Chunk() {}
 };
 
 #endif // CHUNK_H

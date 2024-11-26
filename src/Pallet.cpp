@@ -1,171 +1,125 @@
 #include "Pallet.h"
 
-#include "Config.h"
+#include "utils/config.h"
 
-void Pallet::loadTexture(int key, const char* path, bool isBase) {
-    if (isBase) countBase++;
-    textures.emplace(key, std::make_pair(std::make_unique<Texture2D>(LoadTexture(path)), isBase));
-}
-
-const std::shared_ptr<Texture2D> Pallet::getTexture(int key) const {
-    return textures.at(key).first;
-}
-
-int Pallet::getTextureFromPallet() const {
-    Vector2 position = GetMousePosition();
-
-    int x = (position.x - WIDTH + CELL_SIZE * SCALE * 2 + PALLET_BORDER * SCALE) / CELL_SIZE / SCALE;
-    int y = (position.y - PALLET_BORDER * SCALE) / CELL_SIZE / SCALE;
-
-    if (x < 0 || y > ceil((textures.size() + 1) / 2)) {
-        return -1;
-    }
-
-    if (x + y * 2 >= (int) textures.size()) {
-        return -1;
-    }
-
-    return x + y * 2 + 1;
-}
-
-void Pallet::unloadTextures() {
-    for (const auto& pair : textures) {
-        UnloadTexture(*pair.second.first);
-    }
-}
-
-void Pallet::renderPallet() const {
-    int i = 0;
-
-    DrawRectangle(
-        WIDTH - CELL_SIZE * SCALE * 2 - PALLET_BORDER * SCALE * 2,
-        0,
-        CELL_SIZE * SCALE * 2 + PALLET_BORDER * SCALE * 2,
-        CELL_SIZE * SCALE * ceil((countBase + 1) / 2) + PALLET_BORDER * SCALE * 2,
-        WHITE
+void Pallet::load() {
+    add(
+        GRASS_DIRT,
+        std::make_shared<PalletEntry>(
+            GRASS_DIRT,
+            "resources/grass-dirt.png",
+            TILE,
+            LoadTexture("resources/grass-dirt.png"),
+            false,
+            Rectangle { }
+        )
     );
 
-    for (const auto& pair : textures) {
-        if (pair.second.second) {
-            DrawTexturePro(
-                *pair.second.first,
-                {
-                    0 * CELL_SIZE,
-                    3 * CELL_SIZE,
-                    CELL_SIZE,
-                    CELL_SIZE
-                },
-                {
-                    WIDTH + CELL_SIZE * SCALE * (i % 2) -  CELL_SIZE * SCALE * 2 - PALLET_BORDER * SCALE,
-                    CELL_SIZE * SCALE * (i - i % 2) / 2 + PALLET_BORDER * SCALE,
-                    CELL_SIZE * SCALE,
-                    CELL_SIZE * SCALE
-                },
-                {
-                    0.0f,
-                    0.0f
-                },
-                0.0f,
-                WHITE
-            );
+    add(
+        GRASS_WATER,
+        std::make_shared<PalletEntry>(
+            GRASS_WATER,
+            "resources/grass-water.png",
+            TILE,
+            LoadTexture("resources/grass-water.png"),
+            false,
+            Rectangle { }
+        )
+    );
 
-            i++;
-        }
-    }
+    add(
+        GRASS_GARDEN,
+        std::make_shared<PalletEntry>(
+            GRASS_GARDEN,
+            "resources/grass-garden.png",
+            TILE,
+            LoadTexture("resources/grass-garden.png"),
+            false,
+            Rectangle { }
+        )
+    );
+
+    add(
+        GRASS_ROAD,
+        std::make_shared<PalletEntry>(
+            GRASS_ROAD,
+            "resources/grass-road.png",
+            TILE,
+            LoadTexture("resources/grass-road.png"),
+            false,
+            Rectangle { }
+        )
+    );
+
+    add(
+        DIRT_WATER,
+        std::make_shared<PalletEntry>(
+            DIRT_WATER,
+            "resources/dirt-water.png",
+            TILE,
+            LoadTexture("resources/dirt-water.png"),
+            false,
+            Rectangle { }
+        )
+    );
+
+    add(
+        FENCE,
+        std::make_shared<PalletEntry>(
+            FENCE,
+            "resources/fence.png",
+            OBJECT,
+            LoadTexture("resources/fence.png"),
+            true,
+            Rectangle { 0, 0, TILE_SIZE, TILE_SIZE }
+        )
+    );
+
+    add(
+        PLAYER,
+        std::make_shared<PalletEntry>(
+            PLAYER,
+            "resources/player.png",
+            ENTITY,
+            LoadTexture("resources/player.png"),
+            true,
+            Rectangle { 0, 0, TILE_SIZE, TILE_SIZE * 2 }
+        )
+    );
+
+    add(
+        NPC_1,
+        std::make_shared<PalletEntry>(
+            NPC_1,
+            "resources/npc1.png",
+            ENTITY,
+            LoadTexture("resources/npc1.png"),
+            true,
+            Rectangle { 0, 0, TILE_SIZE, TILE_SIZE * 2 }
+        )
+    );
 }
 
-IntPair Pallet::getMinMax(const std::array<int, 4>& keys) const {
-    IntPair result;
-
-    result.min = *std::min_element(keys.begin(), keys.end());
-    result.max = *std::max_element(keys.begin(), keys.end());
-
-    if (result.min == result.max) result.min = GRASS;
-
-    return result;
+void Pallet::add(int id, std::shared_ptr<PalletEntry> entry) {
+    entries.emplace(id, entry);
 }
 
-Vector2 Pallet::getImageSourcePosition(const std::array<int, 4>& keys) const {
-    static const std::map<std::array<int, 4>, Vector2> mapping = {
-        {{ 0, 0, 0, 0 }, { 2, 1 }},
-        {{ 1, 1, 1, 1 }, { 0, 3 }},
+Texture2D& Pallet::getTexture(int id) {
+    return entries.at(id)->texture;
+}
 
-        {{ 0, 0, 0, 1 }, { 2, 2 }},
-        {{ 0, 0, 1, 0 }, { 3, 1 }},
-        {{ 0, 1, 0, 0 }, { 2, 0 }},
-        {{ 1, 0, 0, 0 }, { 1, 1 }},
+std::vector<std::shared_ptr<PalletEntry>> Pallet::getTextures(PalletType type) {
+    std::vector<std::shared_ptr<PalletEntry>> textures;
 
-        {{ 1, 1, 0, 0 }, { 3, 0 }},
-        {{ 0, 0, 1, 1 }, { 1, 2 }},
-        {{ 0, 1, 1, 0 }, { 3, 2 }},
-        {{ 1, 0, 0, 1 }, { 1, 0 }},
-
-        {{ 1, 1, 1, 0 }, { 0, 0 }},
-        {{ 1, 1, 0, 1 }, { 1, 3 }},
-        {{ 1, 0, 1, 1 }, { 0, 2 }},
-        {{ 0, 1, 1, 1 }, { 3, 3 }},
-
-        {{ 0, 1, 0, 1 }, { 0, 1 }},
-        {{ 1, 0, 1, 0 }, { 2, 3 }},
-    };
-
-    IntPair limits = getMinMax(keys);
-
-    std::array<int, 4> limited = { 0, 0, 0, 0 };
-
-    if (limited != keys) {
-        for (int i = 0; i < 4; i++) {
-            if (keys[i] == limits.max) {
-                limited[i] = 1;
-            }
+    for (std::pair<const int, std::shared_ptr<PalletEntry>>& entry : entries) {
+        if (entry.second->type == type) {
+            textures.push_back(entry.second);
         }
     }
 
-    return mapping.find(limited)->second;
-    
+    return textures;
 }
 
-const std::shared_ptr<Texture2D> Pallet::getTileTexture(const std::array<int, 4>& keys) const {
-    IntPair limits = getMinMax(keys);
-    std::array<int, 2> key = { limits.min, limits.max };
-
-    static const std::map<std::array<int, 2>, int> mapping = {
-        {{ GRASS, GRASS }, GRASS_DIRT },
-        {{ GRASS, DIRT }, GRASS_DIRT },
-        {{ GRASS, WATER }, GRASS_WATER },
-        {{ GRASS, GARDEN }, GRASS_GARDEN },
-        {{ DIRT, WATER }, DIRT_WATER }
-    };
-
-    auto it = mapping.find(key);
-
-    if (it == mapping.end()) return getTexture(GRASS_DIRT);
-    return getTexture(it->second);
-
-}
-
-void Pallet::drawTile(int x, int y, const std::array<int, 4>& keys) const {
-    Vector2 sourceImagePosition = getImageSourcePosition(keys);
-
-    DrawTexturePro(
-        *getTileTexture(keys),
-        {
-            sourceImagePosition.x * CELL_SIZE,
-            sourceImagePosition.y * CELL_SIZE,
-            CELL_SIZE,
-            CELL_SIZE
-        },
-        {
-            (x - 0.5f) * CELL_SIZE * SCALE,
-            (y - 0.5f) * CELL_SIZE * SCALE,
-            CELL_SIZE * SCALE,
-            CELL_SIZE * SCALE
-        },
-        {
-            0.0f,
-            0.0f
-        },
-        0.0f,
-        WHITE
-    );
+Rectangle& Pallet::getColider(int id) {
+    return entries.at(id)->collider;
 }

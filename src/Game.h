@@ -1,61 +1,44 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "Chunk.h"
-#include "Enemy.h"
-#include "Entity.h"
 #include "Mouse.h"
+#include "CameraManager.h"
+#include "SceneManager.h"
+#include "game-objects/entities/Player.h"
 
-#include <vector>
-#include <map>
+#include <memory>
+#include <string>
 
 class Game {
     private:
-        std::map<std::pair<int, int>, std::unique_ptr<Chunk>> chunks;
-        Pallet pallet;
-        Camera2D camera;
-        Entity player;
-        std::vector<std::unique_ptr<Entity>> entities;
-        std::vector<std::unique_ptr<Enemy>> enemies;
         Mouse mouse;
-        bool editMode;
-        int selected;
-        Texture2D largeShadow;
-        Texture2D smallShadow;
+        std::shared_ptr<Player> player;
+        CameraManager cameraManager;
+        // Overlays overlays;
+        // EventManager eventManager;
+        SceneManager sceneManager;
+        std::shared_ptr<Scene> scene;
 
     public:
-        /* Constructor for the Game class
-         *
-         */
-        Game() : mouse(0, 0) {
-            init();
-        };
+        Game() : player(std::make_shared<Player>(PLAYER, Vector2 { 0.0f, 0.0f })), sceneManager(player) {}
 
-        /* Initialises a new game window
-         *
-         */
         void init();
 
-        /* Places a new game object in the relevant chunk
-         *
-         */
-        void placeGameObject(int texture);
+        void logDebugInfo(const std::string message);
 
-        /* Check for inputs
-         */
-        void handle_input();
-
-        /* Updates the current game state
-         */
         void update();
 
-        /* Performs cleanup actions after closing the game windoe
-         */
+        void processCollisions();
+
+        void draw() const;
+
         void cleanup();
 
-        /* Determines whether to close the game window
-         */
         bool shouldClose() const;
+
+        ~Game() {
+            cleanup();
+        }
 };
 
 #endif // GAME_H
