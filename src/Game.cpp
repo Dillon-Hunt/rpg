@@ -7,7 +7,7 @@
 #include <iostream>
 
 void Game::init() {
-    EventManager::get().addListener<Game, const std::string>(
+    EventManager::get().addListener<Game, const std::string&>(
         LOG_DEBUG_INFO,
         this,
         [this](const std::string& message) {
@@ -17,14 +17,17 @@ void Game::init() {
 
     // Demo usage
     EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Initializing game..."));
-    EventManager::get().removeListener<Game, const std::string>(LOG_DEBUG_INFO, this);
-    EventManager::get().removeListeners<Game, const std::string>(this);
-    EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Test"));
 
-    int sceneID = sceneManager.createScene();
-    sceneManager.setScene(sceneID);
+    // EventManager::get().removeListener<Game, const std::string&>(LOG_DEBUG_INFO, this);
+    // EventManager::get().removeListeners<Game, const std::string&>(this);
 
-    scene = sceneManager.getScene();
+    try {
+        int sceneID = sceneManager.createScene();
+        sceneManager.setScene(sceneID);
+        scene = sceneManager.getScene();
+    } catch (const std::exception& e) {
+        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::init() – Error creating scene"));
+    }
 
     cameraManager.follow(player);
 }
@@ -39,7 +42,9 @@ void Game::update() {
     // Update player first to know which chunks to load
     player->update();
 
-    if (scene != nullptr) {
+    if (scene == nullptr) {
+        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::update() – Scene Not Defined"));
+    } else {
         scene->update();
     }
 
@@ -48,8 +53,10 @@ void Game::update() {
 }
 
 void Game::processCollisions() {
-    if (scene != nullptr) {
-        scene->update();
+    if (scene == nullptr) {
+        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::processCollisions() – Scene Not Defined"));
+    } else {
+        scene->checkCollisions();
     }
 }
 
@@ -58,7 +65,9 @@ void Game::draw() const {
     ClearBackground(WHITE);
     BeginMode2D(*cameraManager.getCamera());
 
-    if (scene != nullptr) {
+    if (scene == nullptr) {
+        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::draw() – Scene Not Defined"));
+    } else {
         scene->draw();
     }
 
@@ -77,8 +86,10 @@ void Game::draw() const {
 
 void Game::cleanup() {
     std::cout << "Closing Game..." << std::endl;
+
+    EventManager::get().removeListeners<Game>(this);
 }
 
-bool Game::shouldClose() const {
+[[nodiscard]] bool Game::shouldClose() const {
     return WindowShouldClose();
 }

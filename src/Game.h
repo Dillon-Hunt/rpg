@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "Mouse.h"
+#include "NoCopy.h"
 #include "CameraManager.h"
 #include "SceneManager.h"
 #include "game-objects/entities/Player.h"
@@ -9,13 +10,12 @@
 #include <memory>
 #include <string>
 
-class Game {
+class Game : public NoCopy {
     private:
         Mouse mouse;
         std::shared_ptr<Player> player;
         CameraManager cameraManager;
         // Overlays overlays;
-        // EventManager eventManager;
         SceneManager sceneManager;
         std::shared_ptr<Scene> scene;
 
@@ -34,7 +34,7 @@ class Game {
 
         void cleanup();
 
-        bool shouldClose() const;
+        [[nodiscard]] bool shouldClose() const;
 
         ~Game() {
             cleanup();

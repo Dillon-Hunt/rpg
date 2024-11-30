@@ -82,8 +82,10 @@ void Scene::update() {
             getChunk({ origin.x + x, origin.y + y })->update();
         }
     }
+}
 
-    // Check for collisions
+void Scene::checkCollisions() {
+    Point origin = Vector2ToChunkPosition(player->getPosition());
 
     std::vector<std::shared_ptr<GameObject>> objects;
 

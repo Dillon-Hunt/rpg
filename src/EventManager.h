@@ -15,17 +15,28 @@ enum Event {
     SELECT_TILE
 };
 
+struct BaseEventListener {
+    virtual ~BaseEventListener() = default;
+    virtual bool matchesCaller(void* caller) const = 0;
+};
+
 template <typename Data>
-struct EventListener {
+struct EventListener : BaseEventListener {
     int id;
     void* caller;
     std::function<void(const Data&)> callback;
+
+    EventListener(int id, void* caller, std::function<void(const Data&)> callback) : id(id), caller(caller), callback(callback) {}
+
+    bool matchesCaller(void* c) const override {
+        return caller == c;
+    }
 };
 
 class EventManager {
     private:
         int lastID;
-        std::map<Event, std::vector<std::shared_ptr<void>>> events;
+        std::map<Event, std::vector<std::shared_ptr<BaseEventListener>>> events;
 
         EventManager() : lastID(-1) {}
 
@@ -40,6 +51,7 @@ class EventManager {
         template <typename Caller, typename Data>
         int addListener(const Event event, Caller* caller, const std::function<void(const Data&)>& callback) {
             if (caller == nullptr) return -1;
+
             auto listener = std::make_shared<EventListener<Data>>(EventListener<Data> { ++lastID, caller, callback });
             events[event].emplace_back(listener);
             return lastID;
@@ -60,26 +72,26 @@ class EventManager {
             }
         }
 
-        template <typename Caller, typename Data>
+        template <typename Caller>
         void removeListener(const Event event, Caller* caller) {
             if (caller == nullptr) return;
+
             if (events.find(event) != events.end()) {
-                std::vector<std::shared_ptr<void>>& listeners = events[event];
+                std::vector<std::shared_ptr<BaseEventListener>>& listeners = events[event];
                 
                 listeners.erase(
                     std::remove_if(
                         listeners.begin(),
                         listeners.end(),
                         [caller](const std::shared_ptr<void>& listener) {
-                                auto typedListener = std::static_pointer_cast<EventListener<Data>>(listener);
+                            auto baseListener = std::static_pointer_cast<BaseEventListener>(listener);
 
-                                try {
-                                    bool include = typedListener->caller == static_cast<void*>(caller);
-                                    return include;
-                                } catch (const std::exception& e) {
-                                    return true;
-                                }
+                            if (baseListener) {
+                                return baseListener->matchesCaller(static_cast<void*>(caller));
                             }
+
+                            return true;
+                        }
                     ),
                     listeners.end()
                 );
@@ -91,32 +103,34 @@ class EventManager {
             }
         }
 
-        template <typename Caller, typename Data>
+        template <typename Caller>
         void removeListeners(Caller* caller) {
             if (caller == nullptr) return;
-            for (auto& pair : events) {
-                std::vector<std::shared_ptr<void>>& listeners = pair.second;
+
+            for (auto it = events.begin(); it != events.end();) {
+                std::vector<std::shared_ptr<BaseEventListener>>& listeners = it->second;
                 
                 listeners.erase(
                     std::remove_if(
                         listeners.begin(),
                         listeners.end(),
                         [caller](const std::shared_ptr<void>& listener) {
-                                auto typedListener = std::static_pointer_cast<EventListener<Data>>(listener);
+                            auto baseListener = std::static_pointer_cast<BaseEventListener>(listener);
 
-                                try {
-                                    bool include = typedListener->caller == static_cast<void*>(caller);
-                                    return include;
-                                } catch (const std::exception& e) {
-                                    return true;
-                                }
+                            if (baseListener) {
+                                return baseListener->matchesCaller(static_cast<void*>(caller));
                             }
+
+                            return true;
+                        }
                     ),
                     listeners.end()
                 );
 
                 if (listeners.empty()) {
-                    events.erase(pair.first);
+                    it = events.erase(it);
+                } else {
+                    it++;
                 }
             }
         }

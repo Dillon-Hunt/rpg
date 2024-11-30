@@ -75,6 +75,8 @@ class Scene {
 
         void update();
 
+        void checkCollisions();
+
         void draw();
 
         ~Scene() {}
