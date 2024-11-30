@@ -3,9 +3,15 @@
 
 #include "raylib.h"
 
+#include <tuple>
+
 struct Point {
     int x;
     int y;
+
+    bool operator<(const Point& other) const {
+        return std::tie(x, y) < std::tie(other.x, other.y);
+    }
 };
 
 Point Vector2ToGridPosition(Vector2 v);

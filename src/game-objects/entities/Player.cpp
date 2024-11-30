@@ -5,7 +5,21 @@
 
 #include "../../utils/config.h"
 
+const Vector2& Player::getPosition() const {
+    return position;
+}
+
+const Vector2& Player::getLastDirection() const {
+    return lastDirection;
+}
+
+const Vector2& Player::getLastPosition() const {
+    return lastPosition;
+}
+
 void Player::update() {
+    lastPosition = position;
+
     Vector2 direction = { 0, 0 };
 
     if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) direction.x = 1;
@@ -15,7 +29,11 @@ void Player::update() {
 
     direction = Vector2Normalize(direction);
 
+    lastDirection = direction;
+
     position += direction * PLAYER_SPEED;
+
+    Entity::draw();
 }
 
 void Player::draw() const {
@@ -40,4 +58,6 @@ void Player::draw() const {
         0.0f,
         WHITE
     );
+
+    Entity::draw();
 }

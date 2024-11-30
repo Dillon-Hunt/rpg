@@ -20,7 +20,7 @@ class Game {
         std::shared_ptr<Scene> scene;
 
     public:
-        Game() : player(std::make_shared<Player>(PLAYER, Vector2 { 0.0f, 0.0f })), sceneManager(player) {}
+        Game() : player(std::make_shared<Player>(Vector2 { 0.0f, 0.0f })), sceneManager(player) {}
 
         void init();
 

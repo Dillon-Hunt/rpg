@@ -9,7 +9,11 @@
 
 class Object : public GameObject {
     public:
-        Object(int id, Vector2 position, Texture2D& texture, std::shared_ptr<Chunk> parent) : GameObject(id, position, texture, parent) {}
+        Object(Asset id, Vector2 position, std::shared_ptr<Chunk> parent) : GameObject(id, position, parent) {}
+
+        const Rectangle getColider() const override;
+
+        void draw() const override;
 
         virtual ~Object() {}
 };

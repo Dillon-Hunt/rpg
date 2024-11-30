@@ -4,7 +4,7 @@
 #include "../../Chunk.h"
 
 void TiledObject::update() {
-
+    Object::draw();
 }
 
 Point TiledObject::getObjectSource() const {
@@ -36,10 +36,10 @@ Point TiledObject::getObjectSource() const {
 
     std::shared_ptr<Chunk> chunk = parent.lock();
 
-    if (chunk->getObject(relativePosition.x, relativePosition.y - 1)->get()->getID() == id) key[0] = 1;
-    if (chunk->getObject(relativePosition.x + 1, relativePosition.y)->get()->getID() == id) key[1] = 1;
-    if (chunk->getObject(relativePosition.x, relativePosition.y + 1)->get()->getID() == id) key[2] = 1;
-    if (chunk->getObject(relativePosition.x - 1, relativePosition.y)->get()->getID() == id) key[3] = 1;
+    if (std::shared_ptr<Object> obj = chunk->getObject({relativePosition.x, relativePosition.y - 1}); obj != nullptr && obj->getID() == id) key[0] = 1;
+    if (std::shared_ptr<Object> obj = chunk->getObject({relativePosition.x + 1, relativePosition.y}); obj != nullptr && obj->getID() == id) key[1] = 1;
+    if (std::shared_ptr<Object> obj = chunk->getObject({relativePosition.x, relativePosition.y + 1}); obj != nullptr && obj->getID() == id) key[2] = 1;
+    if (std::shared_ptr<Object> obj = chunk->getObject({relativePosition.x - 1, relativePosition.y}); obj != nullptr && obj->getID() == id) key[3] = 1;
 
     return mapping.find(key)->second;    
 }
@@ -68,4 +68,6 @@ void TiledObject::draw() const {
         0.0f,
         WHITE
     );
+
+    GameObject::draw();
 }

@@ -4,9 +4,19 @@
 
 void Pallet::load() {
     add(
-        GRASS_DIRT,
+        EMPTY_TEXTURE,
         std::make_shared<PalletEntry>(
-            GRASS_DIRT,
+            "resources/empty.png.png",
+            TILE,
+            LoadTexture("resources/empty.png"),
+            false,
+            Rectangle { }
+        )
+    );
+
+    add(
+        GRASS_DIRT_TEXTURE,
+        std::make_shared<PalletEntry>(
             "resources/grass-dirt.png",
             TILE,
             LoadTexture("resources/grass-dirt.png"),
@@ -16,9 +26,8 @@ void Pallet::load() {
     );
 
     add(
-        GRASS_WATER,
+        GRASS_WATER_TEXTURE,
         std::make_shared<PalletEntry>(
-            GRASS_WATER,
             "resources/grass-water.png",
             TILE,
             LoadTexture("resources/grass-water.png"),
@@ -28,9 +37,8 @@ void Pallet::load() {
     );
 
     add(
-        GRASS_GARDEN,
+        GRASS_GARDEN_TEXTURE,
         std::make_shared<PalletEntry>(
-            GRASS_GARDEN,
             "resources/grass-garden.png",
             TILE,
             LoadTexture("resources/grass-garden.png"),
@@ -40,9 +48,8 @@ void Pallet::load() {
     );
 
     add(
-        GRASS_ROAD,
+        GRASS_ROAD_TEXTURE,
         std::make_shared<PalletEntry>(
-            GRASS_ROAD,
             "resources/grass-road.png",
             TILE,
             LoadTexture("resources/grass-road.png"),
@@ -52,9 +59,8 @@ void Pallet::load() {
     );
 
     add(
-        DIRT_WATER,
+        DIRT_WATER_TEXTURE,
         std::make_shared<PalletEntry>(
-            DIRT_WATER,
             "resources/dirt-water.png",
             TILE,
             LoadTexture("resources/dirt-water.png"),
@@ -64,33 +70,52 @@ void Pallet::load() {
     );
 
     add(
-        FENCE,
+        FENCE_TEXTURE,
         std::make_shared<PalletEntry>(
-            FENCE,
             "resources/fence.png",
-            OBJECT,
+            TILED_OBJECT,
             LoadTexture("resources/fence.png"),
             true,
-            Rectangle { 0, 0, TILE_SIZE, TILE_SIZE }
+            Rectangle { 8, 3, 8, 17 }
         )
     );
 
     add(
-        PLAYER,
+        CHEST_TEXTURE,
         std::make_shared<PalletEntry>(
-            PLAYER,
+            "resources/chest.png",
+            OBJECT,
+            LoadTexture("resources/chest.png"),
+            true,
+            Rectangle { 1, 14, TILE_SIZE - 2, 10 }
+        )
+    );
+
+    add(
+        CAMPFIRE_TEXTURE,
+        std::make_shared<PalletEntry>(
+            "resources/campfire.png",
+            OBJECT,
+            LoadTexture("resources/campfire.png"),
+            true,
+            Rectangle { 0, 12, TILE_SIZE, 12 }
+        )
+    );
+
+    add(
+        PLAYER_TEXTURE,
+        std::make_shared<PalletEntry>(
             "resources/player.png",
             ENTITY,
             LoadTexture("resources/player.png"),
             true,
-            Rectangle { 0, 0, TILE_SIZE, TILE_SIZE * 2 }
+            Rectangle { 3, -8, 18, 10 }
         )
     );
 
     add(
-        NPC_1,
+        NPC_1_TEXTURE,
         std::make_shared<PalletEntry>(
-            NPC_1,
             "resources/npc1.png",
             ENTITY,
             LoadTexture("resources/npc1.png"),
@@ -100,18 +125,36 @@ void Pallet::load() {
     );
 }
 
-void Pallet::add(int id, std::shared_ptr<PalletEntry> entry) {
+void Pallet::add(Asset id, std::shared_ptr<PalletEntry> entry) {
     entries.emplace(id, entry);
 }
 
-Texture2D& Pallet::getTexture(int id) {
+Asset Pallet::getAssetFromTile(Tile id) {
+    static const std::map<Tile, Asset> mapping = {
+        { FENCE, FENCE_TEXTURE },
+        { CHEST, CHEST_TEXTURE },
+        { CAMPFIRE, CAMPFIRE_TEXTURE },
+        { PLAYER, PLAYER_TEXTURE },
+        { NPC_1, NPC_1_TEXTURE }
+    };
+
+    auto it = mapping.find(id);
+
+    if (it != mapping.end()) {
+        return it->second;
+    }
+
+    return FENCE_TEXTURE;
+}
+
+const Texture2D& Pallet::getTexture(Asset id) const {
     return entries.at(id)->texture;
 }
 
-std::vector<std::shared_ptr<PalletEntry>> Pallet::getTextures(PalletType type) {
+const std::vector<std::shared_ptr<PalletEntry>> Pallet::getTextures(PalletType type) const {
     std::vector<std::shared_ptr<PalletEntry>> textures;
 
-    for (std::pair<const int, std::shared_ptr<PalletEntry>>& entry : entries) {
+    for (const std::pair<const Asset, std::shared_ptr<PalletEntry>>& entry : entries) {
         if (entry.second->type == type) {
             textures.push_back(entry.second);
         }
@@ -120,6 +163,10 @@ std::vector<std::shared_ptr<PalletEntry>> Pallet::getTextures(PalletType type) {
     return textures;
 }
 
-Rectangle& Pallet::getColider(int id) {
+bool Pallet::isCollidable(Asset id) const {
+    return entries.at(id)->collidable;
+}
+
+const Rectangle& Pallet::getColider(Asset id) const {
     return entries.at(id)->collider;
 }

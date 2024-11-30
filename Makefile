@@ -16,6 +16,9 @@ endif
 # Configurations
 # #############################################
 
+# Libraries
+ALL_LDFLAGS += -lsqlite3
+
 ifeq ($(origin CC), default)
   CC = clang
 endif

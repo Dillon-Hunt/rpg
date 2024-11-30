@@ -9,7 +9,7 @@
 
 class TiledObject : public Object {
     public:
-        TiledObject(int id, Vector2 position, Texture2D& texture, std::shared_ptr<Chunk> parent) : Object(id, position, texture, parent) {}
+        TiledObject(Asset id, Vector2 position, std::shared_ptr<Chunk> parent) : Object(id, position, parent) {}
 
         void update() override;
 

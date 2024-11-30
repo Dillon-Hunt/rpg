@@ -36,7 +36,7 @@ void Game::logDebugInfo(const std::string message) {
 void Game::update() {
     Vector2 cameraOffset = cameraManager.getOffset();
 
-    // Player updates first so the game knows where to load chunks
+    // Update player first to know which chunks to load
     player->update();
 
     if (scene != nullptr) {
@@ -48,7 +48,9 @@ void Game::update() {
 }
 
 void Game::processCollisions() {
-
+    if (scene != nullptr) {
+        scene->update();
+    }
 }
 
 void Game::draw() const {
@@ -67,6 +69,9 @@ void Game::draw() const {
     mouse.draw();
 
     EndMode2D();
+
+    DrawFPS(TILE_SIZE, TILE_SIZE);
+
     EndDrawing();
 }
 

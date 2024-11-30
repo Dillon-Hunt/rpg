@@ -9,7 +9,13 @@
 
 class Entity : public GameObject {
     public:
-        Entity(int id, Vector2 position, Texture2D& texture, std::shared_ptr<Chunk> parent) : GameObject(id, position, texture, parent) {}
+        Entity(Asset id, Vector2 position, std::shared_ptr<Chunk> parent) : GameObject(id, position, parent) {}
+
+        void slide(Vector2 delta);
+
+        void move(Vector2 v);
+
+        const Rectangle getColider() const override;
 
         virtual ~Entity() {}
 };

@@ -11,6 +11,7 @@ enum Event {
     LOG_DEBUG_INFO,
     PLACE_TILE,
     PLACE_OBJECT,
+    PLACE_TILED_OBJECT,
     SELECT_TILE
 };
 

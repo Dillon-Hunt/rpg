@@ -3,6 +3,8 @@
 
 #include "raylib.h"
 
+#include "../Pallet.h"
+
 #include <vector>
 #include <memory>
 
@@ -10,26 +12,30 @@ class Chunk;
 
 class GameObject {
     protected:
-        int id;
+        Asset id;
         Vector2 position;
-        Texture2D& texture;
+        bool collidable;
+        Rectangle collider;
+        const Texture2D& texture;
         std::weak_ptr<Chunk> parent;
-        std::vector<std::unique_ptr<GameObject>> children;
+        std::vector<std::shared_ptr<GameObject>> children;
 
     public:
-        GameObject(int id, Vector2 position, Texture2D& texture, std::shared_ptr<Chunk> parent) : id(id), position(position), texture(texture), parent(parent) {}
+        GameObject(Asset id, Vector2 position, std::shared_ptr<Chunk> parent) : id(id), position(position), collidable(Pallet::get().isCollidable(id)), collider(Pallet::get().getColider(id)), texture(Pallet::get().getTexture(id)), parent(parent) {}
 
-        int getID() const;
+        Asset getID() const;
 
         Vector2 getPosition() const;
 
         std::shared_ptr<Chunk> getParent() const;
 
-        void setTexture(Texture2D& t);
-
         void setParent(std::shared_ptr<Chunk> chunk);
 
-        void addChild(std::unique_ptr<GameObject>& child);
+        void addChild(std::shared_ptr<GameObject>& child);
+
+        bool isCollidable() const;
+
+        virtual const Rectangle getColider() const;
 
         virtual void update();
 

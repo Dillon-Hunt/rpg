@@ -31,20 +31,33 @@ void Mouse::update(Vector2& cameraOffset) {
     }
 
     if (IsKeyPressed(KEY_FIVE)) {
-        type = OBJECT;
+        type = TILED_OBJECT;
         selectedTile = FENCE;
+    }
+
+    if (IsKeyPressed(KEY_SIX)) {
+        type = OBJECT;
+        selectedTile = CHEST;
+    }
+
+    if (IsKeyPressed(KEY_SEVEN)) {
+        type = OBJECT;
+        selectedTile = CAMPFIRE;
     }
 
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         if (IsKeyDown(KEY_LEFT_SHIFT)) {
-            EventManager::get().emitEvent(PLACE_TILE, std::pair<Point, int>(position, GRASS));
+            EventManager::get().emitEvent(PLACE_TILE, std::pair<Point, Tile>(position, GRASS));
         } else {
             switch (type) {
                 case TILE: 
-                    EventManager::get().emitEvent(PLACE_TILE, std::pair<Point, int>(position, selectedTile));
+                    EventManager::get().emitEvent(PLACE_TILE, std::pair<Point, Tile>(position, selectedTile));
                     break;
                 case OBJECT:
-                    EventManager::get().emitEvent(PLACE_OBJECT, std::pair<Point, int>(position, selectedTile));
+                    EventManager::get().emitEvent(PLACE_OBJECT, std::pair<Point, Tile>(position, selectedTile));
+                    break;
+                case TILED_OBJECT:
+                    EventManager::get().emitEvent(PLACE_TILED_OBJECT, std::pair<Point, Tile>(position, selectedTile));
                     break;
                 case ENTITY:
                     break;

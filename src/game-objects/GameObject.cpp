@@ -2,7 +2,7 @@
 
 #include "../Chunk.h"
 
-int GameObject::getID() const {
+Asset GameObject::getID() const {
     return id;
 }
 
@@ -19,22 +19,33 @@ void GameObject::setParent(std::shared_ptr<Chunk> chunk) {
     parent = chunk;
 }
 
-void GameObject::setTexture(Texture2D& t) {
-    texture = t;
+void GameObject::addChild(std::shared_ptr<GameObject>& child) {
+    children.push_back(child);
 }
 
-void GameObject::addChild(std::unique_ptr<GameObject>& child) {
-    children.push_back(std::move(child));
+bool GameObject::isCollidable() const {
+    return collidable;
+}
+
+const Rectangle GameObject::getColider() const {
+    return collider;
 }
 
 void GameObject::update() {
-    for (std::unique_ptr<GameObject>& child : children) {
+    for (std::shared_ptr<GameObject>& child : children) {
         child->update();
     }
 }
 
 void GameObject::draw() const {
-    for (const std::unique_ptr<GameObject>& child : children) {
+    for (const std::shared_ptr<GameObject>& child : children) {
         child->draw();
+    }
+
+    if (collidable && SHOW_COLLISION_BOXES) {
+        DrawRectangleRec(
+            getColider(),
+            ColorAlpha(RED, 0.4)
+        );
     }
 }

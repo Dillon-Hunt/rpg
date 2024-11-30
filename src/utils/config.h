@@ -18,10 +18,8 @@
 #define TILE_SIZE 24
 #define CHUNK_SIZE 16
 
-#define GRASS 0
-#define DIRT 1
-#define WATER 2
-#define GARDEN 3
-#define ROAD 4
+// Debug
+
+#define SHOW_COLLISION_BOXES false
 
 #endif // CONFIG_H

@@ -8,39 +8,54 @@
 #include <string>
 #include <iostream>
 
-// Tiles
+enum Tile {
+    GRASS,
+    DIRT,
+    WATER,
+    GARDEN,
+    ROAD,
 
-#define GRASS_DIRT 0
-#define GRASS_WATER 1
-#define GRASS_GARDEN 2
-#define DIRT_WATER 3
-#define GRASS_ROAD 4
+    FENCE,
+    CHEST,
+    CAMPFIRE,
 
-// Objects
+    PLAYER,
+    NPC_1
+};
 
-#define FENCE 5
+enum Asset {
+    EMPTY_TEXTURE,
 
-// Entities
+    GRASS_DIRT_TEXTURE,
+    GRASS_WATER_TEXTURE,
+    GRASS_GARDEN_TEXTURE,
+    DIRT_WATER_TEXTURE,
+    GRASS_ROAD_TEXTURE,
 
-#define PLAYER 6
-#define NPC_1 7
+    FENCE_TEXTURE,
+    CHEST_TEXTURE,
+    CAMPFIRE_TEXTURE,
+
+    PLAYER_TEXTURE,
+    NPC_1_TEXTURE
+};
 
 enum PalletType {
     TILE,
     OBJECT,
+    TILED_OBJECT,
     ENTITY
 };
 
 struct PalletEntry {
-    int id;
     std::string name;
     PalletType type;
     Texture2D texture;
     bool collidable;
     Rectangle collider;
 
-    PalletEntry(int id, std::string name, PalletType type, Texture2D texture, bool collidable, Rectangle collider)
-        : id(id), name(name), type(type), texture(texture), collidable(collidable), collider(collider) {
+    PalletEntry(std::string name, PalletType type, Texture2D texture, bool collidable, Rectangle collider)
+        : name(name), type(type), texture(texture), collidable(collidable), collider(collider) {
         std::cout << "Loading Texture: " << name << std::endl;
     }
 
@@ -52,7 +67,7 @@ struct PalletEntry {
 
 class Pallet {
     private:
-        std::map<int, std::shared_ptr<PalletEntry>> entries;
+        std::map<Asset, std::shared_ptr<PalletEntry>> entries;
 
         Pallet() = default;
 
@@ -67,13 +82,17 @@ class Pallet {
 
         void load();
 
-        void add(int id, std::shared_ptr<PalletEntry> entry);
+        void add(Asset id, std::shared_ptr<PalletEntry> entry);
 
-        Texture2D& getTexture(int id);
+        Asset getAssetFromTile(Tile id);
 
-        std::vector<std::shared_ptr<PalletEntry>> getTextures(PalletType type);
+        const Texture2D& getTexture(Asset id) const;
 
-        Rectangle& getColider(int id);
+        const std::vector<std::shared_ptr<PalletEntry>> getTextures(PalletType type) const;
+
+        bool isCollidable(Asset id) const;
+
+        const Rectangle& getColider(Asset id) const;
 };
 
 #endif // PALLET_H

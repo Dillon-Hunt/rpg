@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Pallet.h"
+#include "Database.h"
 
 #include <memory>
 
@@ -10,6 +11,8 @@ int main() {
     SetExitKey(0);
 
     Pallet::get().load();
+
+    Database::get().load("resources/data.db");
 
     std::shared_ptr<Game> game = std::make_shared<Game>();
 

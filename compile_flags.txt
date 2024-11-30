@@ -7,3 +7,4 @@ clang++
 -Wextra
 -Wpedantic
 -lraylib
+-lsqlite3
