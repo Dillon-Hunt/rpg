@@ -15,6 +15,14 @@ void Game::init() {
         }
     );
 
+    EventManager::get().addListener<Game, const Point&>(
+        MOUSE_CLICK,
+        this,
+        [this](const Point& position) {
+            clickHandler(position);
+        }
+    );
+
     // Demo usage
     EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Initializing game..."));
 
@@ -36,6 +44,16 @@ void Game::logDebugInfo(const std::string message) {
     std::cout << message << std::endl;
 }
 
+void Game::clickHandler(const Point& gridPos) {
+    Vector2 absolutePos = GetMousePosition();
+
+    // Inventory
+    
+    if (inventory.clickHandler(absolutePos)) return;
+
+    // std::cout << "Click not handled" << std::endl;
+}
+
 void Game::update() {
     Vector2 cameraOffset = cameraManager.getOffset();
 
@@ -48,6 +66,7 @@ void Game::update() {
         scene->update();
     }
 
+    inventory.update();
     cameraManager.update();
     mouse.update(cameraOffset);
 }
@@ -80,6 +99,8 @@ void Game::draw() const {
     EndMode2D();
 
     DrawFPS(TILE_SIZE, TILE_SIZE);
+
+    inventory.draw();
 
     EndDrawing();
 }

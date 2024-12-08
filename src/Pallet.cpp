@@ -147,8 +147,8 @@ Asset Pallet::getAssetFromTile(Tile id) {
     return FENCE_TEXTURE;
 }
 
-const Texture2D& Pallet::getTexture(Asset id) const {
-    return entries.at(id)->texture;
+const Texture2D* Pallet::getTexture(Asset id) const {
+    return &entries.at(id)->texture;
 }
 
 const std::vector<std::shared_ptr<PalletEntry>> Pallet::getTextures(PalletType type) const {

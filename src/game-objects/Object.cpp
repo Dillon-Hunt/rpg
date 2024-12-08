@@ -14,7 +14,7 @@ const Rectangle Object::getColider() const {
 
 void Object::draw() const {
     DrawTexture(
-        texture,
+        *texture,
         position.x - TILE_SIZE / 2.0f,
         position.y - TILE_SIZE / 2.0f,
         WHITE

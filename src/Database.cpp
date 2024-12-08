@@ -135,6 +135,7 @@ int Database::createChunk(int x, int y) {
 
 std::string Database::getIdentifierFromTile(Tile tile) {
     switch (tile) {
+        case NONE:
         case GRASS:
             return "grass";
         case DIRT:

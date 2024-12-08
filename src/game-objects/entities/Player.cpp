@@ -38,22 +38,22 @@ void Player::update() {
 
 void Player::draw() const {
     DrawTexturePro(
-        texture,
+        *texture,
         {
             0,
             0,
-            (float) texture.width,
-            (float) texture.height
+            (float) texture->width,
+            (float) texture->height
         },
         {
             position.x,
             position.y,
-            (float) texture.width,
-            (float) texture.height
+            (float) texture->width,
+            (float) texture->height
         },
         {
-            texture.width / 2.0f,
-            (float) texture.height
+            texture->width / 2.0f,
+            (float) texture->height
         },
         0.0f,
         WHITE

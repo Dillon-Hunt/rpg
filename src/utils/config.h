@@ -3,9 +3,14 @@
 
 // Window
 
+#define FPS 60
 #define WIDTH 800
 #define HEIGHT 600
-#define FPS 60
+#define WINDOW_PADDING 20
+
+// Inventory
+
+#define HOTBAR_SIZE 9
 
 // Entities
 

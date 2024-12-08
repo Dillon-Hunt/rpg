@@ -24,13 +24,13 @@ class Chunk : public std::enable_shared_from_this<Chunk> {
         Tile tiles[CHUNK_SIZE * CHUNK_SIZE];
         std::map<Point, std::shared_ptr<Object>> objects;
 
-        Texture2D getTileTexture(const std::pair<Tile, Tile>& limits) const;
+        const Texture2D* getTileTexture(const std::pair<Tile, Tile>& limits) const;
 
         Rectangle getTileSource(const std::array<int, 4>& key) const;
 
     public:
         Chunk(int chunk_id, Point position, Scene& scene) : chunk_id(chunk_id), position(position), scene(scene) {
-            std::memset(tiles, GRASS, sizeof(tiles));
+            std::memset(tiles, 0, sizeof(tiles));
         }
 
         void load() {

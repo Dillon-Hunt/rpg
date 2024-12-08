@@ -16,7 +16,7 @@ class GameObject {
         Vector2 position;
         bool collidable;
         Rectangle collider;
-        const Texture2D& texture;
+        const Texture2D* texture;
         std::weak_ptr<Chunk> parent;
         std::vector<std::shared_ptr<GameObject>> children;
 

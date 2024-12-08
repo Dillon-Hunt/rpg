@@ -48,7 +48,7 @@ void TiledObject::draw() const {
     Point sourcePosition = getObjectSource();
 
     DrawTexturePro(
-        texture,
+        *texture,
         {
             (float) sourcePosition.x * TILE_SIZE,
             (float) sourcePosition.y * TILE_SIZE,

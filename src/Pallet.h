@@ -9,6 +9,8 @@
 #include <iostream>
 
 enum Tile {
+    NONE,
+
     GRASS,
     DIRT,
     WATER,
@@ -86,7 +88,7 @@ class Pallet {
 
         Asset getAssetFromTile(Tile id);
 
-        const Texture2D& getTexture(Asset id) const;
+        const Texture2D* getTexture(Asset id) const;
 
         const std::vector<std::shared_ptr<PalletEntry>> getTextures(PalletType type) const;
 

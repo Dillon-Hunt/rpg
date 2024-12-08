@@ -11,6 +11,7 @@ Tile Chunk::getTile(int x, int y) const {
     if (x == CHUNK_SIZE) return scene.getChunk({ position.x + 1, position.y })->getTile(0, y);
     if (y == -1) return scene.getChunk({ position.x, position.y - 1 })->getTile(x, CHUNK_SIZE - 1);
     if (y == CHUNK_SIZE) return scene.getChunk({ position.x, position.y + 1 })->getTile(x, 0);
+    if (tiles[x + y * CHUNK_SIZE] == 0) return GRASS;
     return tiles[x + y * CHUNK_SIZE];
 }
 
@@ -43,7 +44,7 @@ std::map<Point, std::shared_ptr<Object>> Chunk::getObjects() {
 }
 
 
-Texture2D Chunk::getTileTexture(const std::pair<Tile, Tile>& limits) const {
+const Texture2D* Chunk::getTileTexture(const std::pair<Tile, Tile>& limits) const {
     static const std::map<std::pair<Tile, Tile>, Asset> mapping = {
         {{ GRASS, GRASS }, GRASS_DIRT_TEXTURE },
         {{ GRASS, DIRT }, GRASS_DIRT_TEXTURE },
@@ -105,6 +106,8 @@ void Chunk::drawTile(int x, int y) const {
     limits.first = *std::min_element(values.begin(), values.end());
     limits.second = *std::max_element(values.begin(), values.end());
 
+    // std::cout << values[0] << " " << values[1] << " " << values[2] << " " << values[3] << std::endl;
+
     if (limits.first == limits.second) {
         limits.first = GRASS;
     }
@@ -125,7 +128,7 @@ void Chunk::drawTile(int x, int y) const {
     }
 
     DrawTexturePro(
-        getTileTexture(limits),
+        *getTileTexture(limits),
         getTileSource(key),
         {
             (float) (position.x * CHUNK_SIZE + x) * TILE_SIZE,

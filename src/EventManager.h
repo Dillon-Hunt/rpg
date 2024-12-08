@@ -12,7 +12,8 @@ enum Event {
     PLACE_TILE,
     PLACE_OBJECT,
     PLACE_TILED_OBJECT,
-    SELECT_TILE
+    SELECT_TILE,
+    MOUSE_CLICK
 };
 
 struct BaseEventListener {
