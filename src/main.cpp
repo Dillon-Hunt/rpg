@@ -9,6 +9,7 @@ int main() {
     InitWindow(WIDTH, HEIGHT, "RPG Game");
     SetTargetFPS(FPS);
     SetExitKey(0);
+    HideCursor();
 
     Pallet::get().load();
 

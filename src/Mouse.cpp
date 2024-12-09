@@ -74,7 +74,10 @@ void Mouse::update(Vector2& cameraOffset) {
     }
 }
 
-void Mouse::draw() const {
-    Vector2 v = GridPositionToVector2(position);
-    // DrawRectangleLines(v.x - TILE_SIZE / 2.0f, v.y - TILE_SIZE / 2.0f, TILE_SIZE, TILE_SIZE, BLUE);
+void Mouse::draw(Vector2 cameraOffset) const {
+    Vector2 v = GetMousePosition();
+    DrawTextureEx(texture, { v.x - texture.width / 2.0f, v.y - texture.width / 2.0f }, 0.0f, SCALE, WHITE);
+    // TODO: Store selected tile and draw outline if selected
+    v = GridPositionToVector2(position);
+    DrawRectangleLines((v.x - TILE_SIZE / 2.0f) * SCALE + cameraOffset.x, (v.y - TILE_SIZE / 2.0f) * SCALE + cameraOffset.y, TILE_SIZE * SCALE, TILE_SIZE * SCALE, BLUE);
 }

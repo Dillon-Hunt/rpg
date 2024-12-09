@@ -9,17 +9,24 @@ class Mouse {
         Point position;
         PalletType type;
         Tile selectedTile;
+        Texture2D texture;
 
     public:
-        Mouse() : position({ 0, 0 }), selectedTile(DIRT) {}
+        Mouse() : position({ 0, 0 }), selectedTile(DIRT) {
+            std::cout << "Loading texture: resources/cursor.png" << std::endl;
+            texture = LoadTexture("resources/cursor.png");
+        }
 
         Point getGridPosition();
 
         void update(Vector2& cameraOffset);
 
-        void draw() const;
+        void draw(Vector2 cameraOffset) const;
 
-        ~Mouse() {}
+        ~Mouse() {
+            std::cout << "Unloading texture: resources/cursor.png" << std::endl;
+            UnloadTexture(texture);
+        }
 
 };
 

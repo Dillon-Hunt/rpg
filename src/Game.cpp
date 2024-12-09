@@ -80,6 +80,8 @@ void Game::processCollisions() {
 }
 
 void Game::draw() const {
+    Vector2 cameraOffset = cameraManager.getOffset();
+
     BeginDrawing();
     ClearBackground(WHITE);
     BeginMode2D(*cameraManager.getCamera());
@@ -94,13 +96,12 @@ void Game::draw() const {
 
     DrawCircle(0, 0, 2.0f, BLACK);
 
-    mouse.draw();
-
     EndMode2D();
 
     DrawFPS(TILE_SIZE, TILE_SIZE);
 
     inventory.draw();
+    mouse.draw(cameraOffset);
 
     EndDrawing();
 }
