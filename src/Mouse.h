@@ -6,15 +6,20 @@
 
 class Mouse {
     private:
+        bool selected;
         Point position;
         PalletType type;
         Tile selectedTile;
-        Texture2D texture;
+        Texture2D cursorTexture;
+        Vector2 selectedPosition;
+        Texture2D selectedTexture;
 
     public:
-        Mouse() : position({ 0, 0 }), selectedTile(DIRT) {
+        Mouse() : selected(false), position({ 0, 0 }), selectedTile(DIRT) {
             std::cout << "Loading texture: resources/cursor.png" << std::endl;
-            texture = LoadTexture("resources/cursor.png");
+            std::cout << "Loading texture: resources/selected-tile.png" << std::endl;
+            cursorTexture = LoadTexture("resources/cursor.png");
+            selectedTexture = LoadTexture("resources/selected-tile.png");
         }
 
         Point getGridPosition();
@@ -25,7 +30,9 @@ class Mouse {
 
         ~Mouse() {
             std::cout << "Unloading texture: resources/cursor.png" << std::endl;
-            UnloadTexture(texture);
+            std::cout << "Unloading texture: resources/selected-tile.png" << std::endl;
+            UnloadTexture(cursorTexture);
+            UnloadTexture(selectedTexture);
         }
 
 };

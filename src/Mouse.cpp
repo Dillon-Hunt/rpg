@@ -1,6 +1,7 @@
 #include "Mouse.h"
 
 #include "raylib.h"
+#include "raymath.h"
 
 #include "utils/config.h"
 #include "EventManager.h"
@@ -65,19 +66,38 @@ void Mouse::update(Vector2& cameraOffset) {
     //     }
     // }
 
-
     Vector2 v = GetMousePosition();
     position = Vector2ToGridPosition(Vector2 { (v.x - cameraOffset.x) / SCALE, (v.y - cameraOffset.y) / SCALE });
 
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
         EventManager::get().emitEvent(MOUSE_CLICK, position);
     }
+    
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Vector2 newPos = GridPositionToVector2(position);
+
+        if (selected && newPos == selectedPosition) {
+            selected = false;
+        } else {
+            selected = true;
+            selectedPosition = newPos;
+        }
+    }
+
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        selected = false;
+    }
 }
 
 void Mouse::draw(Vector2 cameraOffset) const {
+
+    if (selected) {
+        DrawTextureEx(selectedTexture, { (selectedPosition.x - selectedTexture.width / 2.0f) * SCALE + cameraOffset.x, (selectedPosition.y - selectedTexture.height / 2.0f) * SCALE + cameraOffset.y }, 0.0f, SCALE, WHITE);
+    }
+
     Vector2 v = GetMousePosition();
-    DrawTextureEx(texture, { v.x - texture.width / 2.0f, v.y - texture.width / 2.0f }, 0.0f, SCALE, WHITE);
+    DrawTextureEx(cursorTexture, { v.x - (cursorTexture.width / 2.0f) * SCALE, v.y - (cursorTexture.width / 2.0f) * SCALE }, 0.0f, SCALE, WHITE);
+
     // TODO: Store selected tile and draw outline if selected
-    v = GridPositionToVector2(position);
-    DrawRectangleLines((v.x - TILE_SIZE / 2.0f) * SCALE + cameraOffset.x, (v.y - TILE_SIZE / 2.0f) * SCALE + cameraOffset.y, TILE_SIZE * SCALE, TILE_SIZE * SCALE, BLUE);
+    // DrawRectangleLines((v.x - TILE_SIZE / 2.0f) * SCALE + cameraOffset.x, (v.y - TILE_SIZE / 2.0f) * SCALE + cameraOffset.y, TILE_SIZE * SCALE, TILE_SIZE * SCALE, BLUE);
 }
