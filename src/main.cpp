@@ -2,8 +2,6 @@
 #include "Pallet.h"
 #include "Database.h"
 
-#include <memory>
-
 int main() {
     SetTraceLogLevel(LOG_ERROR); 
     InitWindow(WIDTH, HEIGHT, "RPG Game");
@@ -15,14 +13,14 @@ int main() {
 
     Database::get().load("resources/data.db");
 
-    std::shared_ptr<Game> game = std::make_shared<Game>();
+    Game game;
 
-    game->init();
+    game.init();
 
-    while (!game->shouldClose()) {
-        game->update();
-        game->processCollisions();
-        game->draw();
+    while (!game.shouldClose()) {
+        game.update();
+        game.processCollisions();
+        game.draw();
     }
 
     return 0;

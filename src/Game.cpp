@@ -44,14 +44,15 @@ void Game::logDebugInfo(const std::string message) {
     std::cout << message << std::endl;
 }
 
-void Game::clickHandler(const Point& gridPos) {
-    Vector2 absolutePos = GetMousePosition();
+void Game::clickHandler(const Point& gridPosition) {
+    Vector2 mousePosition = GetMousePosition();
 
     // Inventory
     
-    if (inventory.clickHandler(absolutePos)) return;
+    if (inventory.clickHandler(mousePosition)) return;
+    if (mouse.clickHandler(gridPosition)) return;
 
-    // std::cout << "Click not handled" << std::endl;
+    std::cout << "Click not handled" << std::endl;
 }
 
 void Game::update() {

@@ -2,20 +2,19 @@
 #define MOUSE_H
 
 #include "utils/grid.h"
-#include "Pallet.h"
+
+#include <iostream>
 
 class Mouse {
     private:
         bool selected;
         Point position;
-        PalletType type;
-        Tile selectedTile;
+        Vector2 selectedTile;
         Texture2D cursorTexture;
-        Vector2 selectedPosition;
         Texture2D selectedTexture;
 
     public:
-        Mouse() : selected(false), position({ 0, 0 }), selectedTile(DIRT) {
+        Mouse() : selected(false), position({ 0, 0 }) {
             std::cout << "Loading texture: resources/cursor.png" << std::endl;
             std::cout << "Loading texture: resources/selected-tile.png" << std::endl;
             cursorTexture = LoadTexture("resources/cursor.png");
@@ -23,6 +22,8 @@ class Mouse {
         }
 
         Point getGridPosition();
+
+        bool clickHandler(const Point& gridPosition);
 
         void update(Vector2& cameraOffset);
 

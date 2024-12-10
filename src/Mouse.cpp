@@ -69,19 +69,8 @@ void Mouse::update(Vector2& cameraOffset) {
     Vector2 v = GetMousePosition();
     position = Vector2ToGridPosition(Vector2 { (v.x - cameraOffset.x) / SCALE, (v.y - cameraOffset.y) / SCALE });
 
-    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        EventManager::get().emitEvent(MOUSE_CLICK, position);
-    }
-    
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        Vector2 newPos = GridPositionToVector2(position);
-
-        if (selected && newPos == selectedPosition) {
-            selected = false;
-        } else {
-            selected = true;
-            selectedPosition = newPos;
-        }
+        EventManager::get().emitEvent(MOUSE_CLICK, position);
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
@@ -89,10 +78,23 @@ void Mouse::update(Vector2& cameraOffset) {
     }
 }
 
+bool Mouse::clickHandler(const Point& gridPosition) {
+    Vector2 newPos = GridPositionToVector2(gridPosition);
+
+    if (selected && newPos == selectedTile) {
+        selected = false;
+    } else {
+        selected = true;
+        selectedTile = newPos;
+    }
+
+    return true;
+}
+
 void Mouse::draw(Vector2 cameraOffset) const {
 
     if (selected) {
-        DrawTextureEx(selectedTexture, { (selectedPosition.x - selectedTexture.width / 2.0f) * SCALE + cameraOffset.x, (selectedPosition.y - selectedTexture.height / 2.0f) * SCALE + cameraOffset.y }, 0.0f, SCALE, WHITE);
+        DrawTextureEx(selectedTexture, { (selectedTile.x - selectedTexture.width / 2.0f) * SCALE + cameraOffset.x, (selectedTile.y - selectedTexture.height / 2.0f) * SCALE + cameraOffset.y }, 0.0f, SCALE, WHITE);
     }
 
     Vector2 v = GetMousePosition();
