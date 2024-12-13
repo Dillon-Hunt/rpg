@@ -34,7 +34,9 @@ class Mouse {
 
         void update(Vector2& cameraOffset);
 
-        void draw(Vector2 cameraOffset) const;
+        void drawSelector() const;
+
+        void drawCursor() const;
 
         ~Mouse() {
             std::cout << "Unloading texture: resources/cursor.png" << std::endl;

@@ -11,7 +11,7 @@ Tile Chunk::getTile(int x, int y) const {
     if (x == CHUNK_SIZE) return scene.getChunk({ position.x + 1, position.y })->getTile(0, y);
     if (y == -1) return scene.getChunk({ position.x, position.y - 1 })->getTile(x, CHUNK_SIZE - 1);
     if (y == CHUNK_SIZE) return scene.getChunk({ position.x, position.y + 1 })->getTile(x, 0);
-    if (tiles[x + y * CHUNK_SIZE] == 0) return GRASS;
+    if (tiles[x + y * CHUNK_SIZE] == NONE) return GRASS;
     return tiles[x + y * CHUNK_SIZE];
 }
 
@@ -57,6 +57,7 @@ const Texture2D* Chunk::getTileTexture(const std::pair<Tile, Tile>& limits) cons
     auto it = mapping.find(limits);
 
     if (it == mapping.end()) {
+        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Texture not found"));
         return Pallet::get().getTexture(GRASS_DIRT_TEXTURE);
     }
 

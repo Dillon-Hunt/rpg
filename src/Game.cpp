@@ -35,8 +35,8 @@ void Game::init() {
 void Game::clickHandler(const Point& gridPosition) {
     Vector2 mousePosition = GetMousePosition();
 
-    // Inventory
-    
+    // Allow handeling of clicks by z-axis priority
+
     if (inventory.clickHandler(mousePosition)) return;
 
     switch (mode) {
@@ -44,6 +44,7 @@ void Game::clickHandler(const Point& gridPosition) {
             if (mouse.clickHandler(gridPosition)) return;
             break; 
         case EDIT:
+            if (pallet.clickHandler(mousePosition)) return;
             if (scene->clickHandler(gridPosition)) return;
             break;
     }
@@ -78,6 +79,8 @@ void Game::handleKeyPresses() {
     if (IsKeyPressed(KEY_ESCAPE)) {
         eventManager.emitEvent(ESCAPE);
     }
+
+    // Number keys reserved for inventory hotbar (managed in Inventory.cpp)
 }
 
 void Game::update() {
@@ -108,11 +111,13 @@ void Game::processCollisions() {
 }
 
 void Game::draw() const {
-    Vector2 cameraOffset = cameraManager.getOffset();
+    // Vector2 cameraOffset = cameraManager.getOffset();
 
     BeginDrawing();
     ClearBackground(WHITE);
+
     BeginMode2D(*cameraManager.getCamera());
+    DrawCircle(0, 0, 2.0f, BLACK);
 
     if (scene == nullptr) {
         eventManager.emitEvent(LOG_DEBUG_INFO, std::string("Game::draw() – Scene Not Defined"));
@@ -121,8 +126,7 @@ void Game::draw() const {
     }
 
     player->draw();
-
-    DrawCircle(0, 0, 2.0f, BLACK);
+    mouse.drawSelector();
 
     EndMode2D();
 
@@ -130,7 +134,7 @@ void Game::draw() const {
 
     if (mode == EDIT) pallet.draw();
     inventory.draw();
-    mouse.draw(cameraOffset);
+    mouse.drawCursor();
 
     EndDrawing();
 }

@@ -2,6 +2,8 @@
 
 #include "utils/config.h"
 
+#include <iostream>
+
 void Pallet::load() {
 
     // Default
@@ -9,9 +11,22 @@ void Pallet::load() {
     add(
         EMPTY_TEXTURE,
         std::make_shared<PalletEntry>(
-            "resources/empty.png.png",
-            TILE,
+            "resources/empty.png",
+            SINGLE_TILE,
             LoadTexture("resources/empty.png"),
+            false,
+            Rectangle { }
+        )
+    );
+
+    // GRASS
+    tiles.insert_or_assign(GRASS, GRASS_TEXTURE);
+    add(
+        GRASS_TEXTURE,
+        std::make_shared<PalletEntry>(
+            "resources/grass.png",
+            SINGLE_TILE,
+            LoadTexture("resources/grass.png"),
             false,
             Rectangle { }
         )
@@ -192,6 +207,20 @@ const Rectangle& Pallet::getColider(Asset id) const {
     return entries.at(id)->collider;
 }
 
+bool Pallet::clickHandler(Vector2 mousePosition) {
+    if (
+        mousePosition.x > WINDOW_PADDING &&
+        mousePosition.x < WINDOW_PADDING + (counts.at(TILE) - 1) * TILE_SIZE * SCALE &&
+        mousePosition.y > WINDOW_PADDING &&
+        mousePosition.y < WINDOW_PADDING + TILE_SIZE * SCALE
+    ) {
+        std::cout << mousePosition.x << " " << mousePosition.y << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
 void Pallet::draw() const {
 
     int i = 0;
@@ -199,7 +228,7 @@ void Pallet::draw() const {
     DrawRectangle(
         WINDOW_PADDING - 5,
         WINDOW_PADDING - 5,
-        (counts.at(TILE) - 1) * TILE_SIZE * SCALE + 10,
+        (counts.at(TILE) + counts.at(SINGLE_TILE) - 1) * TILE_SIZE * SCALE + 10,
         TILE_SIZE * SCALE + 10,
         WHITE
     );
@@ -207,12 +236,12 @@ void Pallet::draw() const {
     for (const auto& it : tiles) {
         std::shared_ptr<PalletEntry> entry = entries.at(it.second);
 
-        if (entry->type == TILE) {
+        if (entry->type == TILE || entry->type == SINGLE_TILE) {
             DrawTexturePro(
                 entry->texture,
                 {
                     0,
-                    3 * TILE_SIZE,
+                    (float) (entry->type == TILE ? 3 * TILE_SIZE : 0),
                     TILE_SIZE,
                     TILE_SIZE
                 },

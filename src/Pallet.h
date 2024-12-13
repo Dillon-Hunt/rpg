@@ -27,6 +27,7 @@ enum Tile {
 
 enum Asset {
     EMPTY_TEXTURE,
+    GRASS_TEXTURE,
 
     GRASS_DIRT_TEXTURE,
     GRASS_WATER_TEXTURE,
@@ -43,6 +44,7 @@ enum Asset {
 };
 
 enum PalletType {
+    SINGLE_TILE,
     TILE,
     OBJECT,
     TILED_OBJECT,
@@ -97,6 +99,8 @@ class Pallet {
         bool isCollidable(Asset id) const;
 
         const Rectangle& getColider(Asset id) const;
+
+        bool clickHandler(Vector2 mousePosition);
 
         void draw() const;
 };

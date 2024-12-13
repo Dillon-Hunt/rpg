@@ -16,7 +16,7 @@ void Scene::deactivate() {
 }
 
 bool Scene::clickHandler(const Point& gridPosition) {
-    setTile(gridPosition, DIRT);
+    setTile(gridPosition, NONE);
 
     return true;
 }
