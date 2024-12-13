@@ -58,6 +58,8 @@ class Scene {
 
         void deactivate();
 
+        bool clickHandler(const Point& gridPosition);
+
         void setTile(Point p, Tile tile);
 
         template <typename T>

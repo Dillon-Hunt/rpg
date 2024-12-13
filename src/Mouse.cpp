@@ -4,7 +4,6 @@
 #include "raymath.h"
 
 #include "utils/config.h"
-#include "EventManager.h"
 
 Point Mouse::getGridPosition() {
     return position;
@@ -69,12 +68,8 @@ void Mouse::update(Vector2& cameraOffset) {
     Vector2 v = GetMousePosition();
     position = Vector2ToGridPosition(Vector2 { (v.x - cameraOffset.x) / SCALE, (v.y - cameraOffset.y) / SCALE });
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        EventManager::get().emitEvent(MOUSE_CLICK, position);
-    }
-
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        selected = false;
+    if (mode == EDIT) {
+        selectedTile = GridPositionToVector2(position);
     }
 }
 
@@ -93,7 +88,7 @@ bool Mouse::clickHandler(const Point& gridPosition) {
 
 void Mouse::draw(Vector2 cameraOffset) const {
 
-    if (selected) {
+    if (selected || mode == EDIT) {
         DrawTextureEx(selectedTexture, { (selectedTile.x - selectedTexture.width / 2.0f) * SCALE + cameraOffset.x, (selectedTile.y - selectedTexture.height / 2.0f) * SCALE + cameraOffset.y }, 0.0f, SCALE, WHITE);
     }
 

@@ -9,13 +9,6 @@
 #include "game-objects/entities/Player.h"
 
 #include <memory>
-#include <string>
-
-/// Mode the game is in, determines game behaviour
-enum Mode {
-    GAME,
-    EDIT
-};
 
 /**
  * Mangages game state and perfroms main game loop.
@@ -24,23 +17,25 @@ enum Mode {
  */
 class Game : public NoCopy {
     private:
+        Mode mode;
         Mouse mouse;
         std::shared_ptr<Player> player;
         CameraManager cameraManager;
-        // Overlays overlays;
+        EventManager& eventManager;
         SceneManager sceneManager;
         std::shared_ptr<Scene> scene;
         Inventory inventory;
-        Mode mode;
 
     public:
         /**
          * Constructor for Game
          */
         Game() :
+            mode(GAME),
+            mouse(mode),
             player(std::make_shared<Player>(Vector2 { 0.0f, 0.0f })),
-            sceneManager(player),
-            mode(GAME) {}
+            eventManager(EventManager::get()),
+            sceneManager(player) {}
 
         /**
          * Sets app all relevent components for a new game
@@ -48,18 +43,21 @@ class Game : public NoCopy {
         void init();
 
         /**
-         * Prints debug information to the console
-         *
-         * @param message the message to print
-         */
-        void logDebugInfo(const std::string message);
-
-        /**
          * Handles bahaviour when the user clicks the screen
          *
          * @param gridPosition the position of the tile being clicked
          */
         void clickHandler(const Point& gridPosition);
+
+        /**
+         * Switch between gameplay and edit modes
+         */
+        void toggleMode();
+
+        /**
+         * Handle key presses and emit relevant events
+         */
+        void handleKeyPresses();
 
         /**
          * Called every farm to update the game state

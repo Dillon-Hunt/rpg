@@ -15,6 +15,12 @@ void Scene::deactivate() {
     active = false;
 }
 
+bool Scene::clickHandler(const Point& gridPosition) {
+    setTile(gridPosition, DIRT);
+
+    return true;
+}
+
 void Scene::setTile(Point p, Tile tile) {
     Point position = GridPositionToChunkPosition(p); 
     getChunk(position)->setTile(p.x - position.x * CHUNK_SIZE, p.y - position.y * CHUNK_SIZE, tile);

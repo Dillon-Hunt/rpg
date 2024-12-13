@@ -7,15 +7,7 @@
 #include <iostream>
 
 void Game::init() {
-    EventManager::get().addListener<Game, const std::string&>(
-        LOG_DEBUG_INFO,
-        this,
-        [this](const std::string& message) {
-            logDebugInfo(message);
-        }
-    );
-
-    EventManager::get().addListener<Game, const Point&>(
+    eventManager.addListener<Game, const Point&>(
         MOUSE_CLICK,
         this,
         [this](const Point& position) {
@@ -24,24 +16,20 @@ void Game::init() {
     );
 
     // Demo usage
-    EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Initializing game..."));
+    eventManager.emitEvent(LOG_DEBUG_INFO, std::string("Initializing game..."));
 
-    // EventManager::get().removeListener<Game, const std::string&>(LOG_DEBUG_INFO, this);
-    // EventManager::get().removeListeners<Game, const std::string&>(this);
+    // eventManager.removeListener<Game, const std::string&>(LOG_DEBUG_INFO, this);
+    // eventManager.removeListeners<Game, const std::string&>(this);
 
     try {
         int sceneID = sceneManager.createScene();
         sceneManager.setScene(sceneID);
         scene = sceneManager.getScene();
     } catch (const std::exception& e) {
-        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::init() – Error creating scene"));
+        eventManager.emitEvent(LOG_DEBUG_INFO, std::string("Game::init() – Error creating scene"));
     }
 
     cameraManager.follow(player);
-}
-
-void Game::logDebugInfo(const std::string message) {
-    std::cout << message << std::endl;
 }
 
 void Game::clickHandler(const Point& gridPosition) {
@@ -50,19 +38,58 @@ void Game::clickHandler(const Point& gridPosition) {
     // Inventory
     
     if (inventory.clickHandler(mousePosition)) return;
-    if (mouse.clickHandler(gridPosition)) return;
+
+    switch (mode) {
+        case GAME:
+            if (mouse.clickHandler(gridPosition)) return;
+            break; 
+        case EDIT:
+            if (scene->clickHandler(gridPosition)) return;
+            break;
+    }
 
     std::cout << "Click not handled" << std::endl;
 }
 
+void Game::toggleMode() {
+    switch (mode) {
+        case GAME:
+            mode = EDIT;
+            break;
+        case EDIT:
+            mode = GAME;
+            break;
+    }
+}
+
+void Game::handleKeyPresses() {
+
+    // Click
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        eventManager.emitEvent(MOUSE_CLICK, mouse.getGridPosition());
+    }
+
+    // Toggle Mode
+    if (IsKeyPressed(KEY_M)) {
+        toggleMode();
+    }
+
+    // Escape
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        eventManager.emitEvent(ESCAPE);
+    }
+}
+
 void Game::update() {
+    handleKeyPresses();
+
     Vector2 cameraOffset = cameraManager.getOffset();
 
     // Update player first to know which chunks to load
     player->update();
 
     if (scene == nullptr) {
-        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::update() – Scene Not Defined"));
+        eventManager.emitEvent(LOG_DEBUG_INFO, std::string("Game::update() – Scene Not Defined"));
     } else {
         scene->update();
     }
@@ -74,7 +101,7 @@ void Game::update() {
 
 void Game::processCollisions() {
     if (scene == nullptr) {
-        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::processCollisions() – Scene Not Defined"));
+        eventManager.emitEvent(LOG_DEBUG_INFO, std::string("Game::processCollisions() – Scene Not Defined"));
     } else {
         scene->checkCollisions();
     }
@@ -88,7 +115,7 @@ void Game::draw() const {
     BeginMode2D(*cameraManager.getCamera());
 
     if (scene == nullptr) {
-        EventManager::get().emitEvent(LOG_DEBUG_INFO, std::string("Game::draw() – Scene Not Defined"));
+        eventManager.emitEvent(LOG_DEBUG_INFO, std::string("Game::draw() – Scene Not Defined"));
     } else {
         scene->draw();
     }
@@ -108,9 +135,8 @@ void Game::draw() const {
 }
 
 void Game::cleanup() {
-    std::cout << "Closing Game..." << std::endl;
-
-    EventManager::get().removeListeners<Game>(this);
+    eventManager.emitEvent(LOG_DEBUG_INFO, std::string("Closing Game..."));
+    eventManager.removeListeners<Game>(this);
 }
 
 [[nodiscard]] bool Game::shouldClose() const {

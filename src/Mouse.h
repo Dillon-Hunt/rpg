@@ -2,6 +2,8 @@
 #define MOUSE_H
 
 #include "utils/grid.h"
+#include "utils/mode.h"
+#include "EventManager.h"
 
 #include <iostream>
 
@@ -12,13 +14,18 @@ class Mouse {
         Vector2 selectedTile;
         Texture2D cursorTexture;
         Texture2D selectedTexture;
+        Mode& mode;
 
     public:
-        Mouse() : selected(false), position({ 0, 0 }) {
+        Mouse(Mode& mode) : selected(false), position({ 0, 0 }), mode(mode) {
             std::cout << "Loading texture: resources/cursor.png" << std::endl;
             std::cout << "Loading texture: resources/selected-tile.png" << std::endl;
             cursorTexture = LoadTexture("resources/cursor.png");
             selectedTexture = LoadTexture("resources/selected-tile.png");
+
+            EventManager::get().addListener<Mouse>(ESCAPE, this, [this]() {
+                selected = false;
+            });
         }
 
         Point getGridPosition();
@@ -34,6 +41,8 @@ class Mouse {
             std::cout << "Unloading texture: resources/selected-tile.png" << std::endl;
             UnloadTexture(cursorTexture);
             UnloadTexture(selectedTexture);
+
+            EventManager::get().removeListeners(this);
         }
 
 };

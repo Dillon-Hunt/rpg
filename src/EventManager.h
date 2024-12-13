@@ -13,7 +13,8 @@ enum Event {
     PLACE_OBJECT,
     PLACE_TILED_OBJECT,
     SELECT_TILE,
-    MOUSE_CLICK
+    MOUSE_CLICK,
+    ESCAPE
 };
 
 struct BaseEventListener {
@@ -28,6 +29,20 @@ struct EventListener : BaseEventListener {
     std::function<void(const Data&)> callback;
 
     EventListener(int id, void* caller, std::function<void(const Data&)> callback) : id(id), caller(caller), callback(callback) {}
+
+    bool matchesCaller(void* c) const override {
+        return caller == c;
+    }
+};
+
+template <>
+struct EventListener<void> : BaseEventListener {
+    int id;
+    void* caller;
+    std::function<void()> callback;
+
+    EventListener(int id, void* caller, std::function<void()> callback)
+        : id(id), caller(caller), callback(callback) {}
 
     bool matchesCaller(void* c) const override {
         return caller == c;
@@ -49,13 +64,32 @@ class EventManager {
             return instance;
         }
 
+        template <typename Caller>
+        int addListener(const Event event, Caller* caller, const std::function<void()>& callback) {
+            auto listener = std::make_shared<EventListener<void>>(EventListener<void> { ++lastID, caller, callback });
+            events[event].emplace_back(listener);
+            return lastID;
+        }
+
         template <typename Caller, typename Data>
         int addListener(const Event event, Caller* caller, const std::function<void(const Data&)>& callback) {
-            if (caller == nullptr) return -1;
-
             auto listener = std::make_shared<EventListener<Data>>(EventListener<Data> { ++lastID, caller, callback });
             events[event].emplace_back(listener);
             return lastID;
+        }
+        
+        void emitEvent(const Event event) {
+            if (events.find(event) != events.end()) {
+                for (const auto& listener : events[event]) {
+                    auto typedListener = std::static_pointer_cast<EventListener<void>>(listener);
+
+                    try {
+                        typedListener->callback();
+                    } catch (const std::exception& e) {
+                        continue;
+                    }
+                }
+            }
         }
 
         template <typename Data>
