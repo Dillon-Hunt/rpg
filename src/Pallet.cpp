@@ -3,6 +3,9 @@
 #include "utils/config.h"
 
 void Pallet::load() {
+
+    // Default
+    tiles.insert_or_assign(NONE, EMPTY_TEXTURE);
     add(
         EMPTY_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -14,6 +17,8 @@ void Pallet::load() {
         )
     );
 
+    // DIRT
+    tiles.insert_or_assign(DIRT, GRASS_DIRT_TEXTURE);
     add(
         GRASS_DIRT_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -25,6 +30,8 @@ void Pallet::load() {
         )
     );
 
+    // Water
+    tiles.insert_or_assign(WATER, GRASS_WATER_TEXTURE);
     add(
         GRASS_WATER_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -36,6 +43,8 @@ void Pallet::load() {
         )
     );
 
+    // Garden
+    tiles.insert_or_assign(GARDEN, GRASS_GARDEN_TEXTURE);
     add(
         GRASS_GARDEN_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -47,6 +56,8 @@ void Pallet::load() {
         )
     );
 
+    // Road
+    tiles.insert_or_assign(ROAD, GRASS_ROAD_TEXTURE);
     add(
         GRASS_ROAD_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -69,6 +80,8 @@ void Pallet::load() {
         )
     );
 
+    // Fence
+    tiles.insert_or_assign(FENCE, FENCE_TEXTURE);
     add(
         FENCE_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -80,6 +93,8 @@ void Pallet::load() {
         )
     );
 
+    // Chest
+    tiles.insert_or_assign(CHEST, CHEST_TEXTURE);
     add(
         CHEST_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -91,6 +106,8 @@ void Pallet::load() {
         )
     );
 
+    // Campfire
+    tiles.insert_or_assign(CAMPFIRE, CAMPFIRE_TEXTURE);
     add(
         CAMPFIRE_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -102,6 +119,8 @@ void Pallet::load() {
         )
     );
 
+    // Player
+    tiles.insert_or_assign(PLAYER, PLAYER_TEXTURE);
     add(
         PLAYER_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -113,6 +132,8 @@ void Pallet::load() {
         )
     );
 
+    // NPC 1
+    tiles.insert_or_assign(NPC_1, NPC_1_TEXTURE);
     add(
         NPC_1_TEXTURE,
         std::make_shared<PalletEntry>(
@@ -127,20 +148,20 @@ void Pallet::load() {
 
 void Pallet::add(Asset id, std::shared_ptr<PalletEntry> entry) {
     entries.emplace(id, entry);
+
+    auto it = counts.find(entry->type);
+
+    if (it != counts.end()) {
+        it->second++;
+    }
+
+    counts.emplace(entry->type, 1);
 }
 
 Asset Pallet::getAssetFromTile(Tile id) {
-    static const std::map<Tile, Asset> mapping = {
-        { FENCE, FENCE_TEXTURE },
-        { CHEST, CHEST_TEXTURE },
-        { CAMPFIRE, CAMPFIRE_TEXTURE },
-        { PLAYER, PLAYER_TEXTURE },
-        { NPC_1, NPC_1_TEXTURE }
-    };
+    auto it = tiles.find(id);
 
-    auto it = mapping.find(id);
-
-    if (it != mapping.end()) {
+    if (it != tiles.end()) {
         return it->second;
     }
 
@@ -169,4 +190,47 @@ bool Pallet::isCollidable(Asset id) const {
 
 const Rectangle& Pallet::getColider(Asset id) const {
     return entries.at(id)->collider;
+}
+
+void Pallet::draw() const {
+
+    int i = 0;
+
+    DrawRectangle(
+        WINDOW_PADDING - 5,
+        WINDOW_PADDING - 5,
+        (counts.at(TILE) - 1) * TILE_SIZE * SCALE + 10,
+        TILE_SIZE * SCALE + 10,
+        WHITE
+    );
+
+    for (const auto& it : tiles) {
+        std::shared_ptr<PalletEntry> entry = entries.at(it.second);
+
+        if (entry->type == TILE) {
+            DrawTexturePro(
+                entry->texture,
+                {
+                    0,
+                    3 * TILE_SIZE,
+                    TILE_SIZE,
+                    TILE_SIZE
+                },
+                {
+                    WINDOW_PADDING + i * TILE_SIZE * SCALE,
+                    WINDOW_PADDING,
+                    TILE_SIZE * SCALE,
+                    TILE_SIZE * SCALE
+                },
+                {
+                    0,
+                    0
+                },
+                0.0f,
+                WHITE
+            );
+        }
+
+        i++;
+    }
 }

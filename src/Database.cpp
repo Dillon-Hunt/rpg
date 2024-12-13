@@ -93,7 +93,7 @@ ChunkDB Database::getChunk(int x, int y) {
         chunk.x = sqlite3_column_int(stmt, 1);
         chunk.y = sqlite3_column_int(stmt, 2);
     } else {
-        std::cerr << "Chunk not found for coordinates (" << x << ", " << y << ")" << std::endl;
+        std::cout << "Chunk not found for coordinates (" << x << ", " << y << ")" << std::endl;
     }
 
     sqlite3_finalize(stmt);

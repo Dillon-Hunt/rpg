@@ -19,6 +19,7 @@ class Game : public NoCopy {
     private:
         Mode mode;
         Mouse mouse;
+        Pallet& pallet;
         std::shared_ptr<Player> player;
         CameraManager cameraManager;
         EventManager& eventManager;
@@ -33,6 +34,7 @@ class Game : public NoCopy {
         Game() :
             mode(GAME),
             mouse(mode),
+            pallet(Pallet::get()),
             player(std::make_shared<Player>(Vector2 { 0.0f, 0.0f })),
             eventManager(EventManager::get()),
             sceneManager(player) {}

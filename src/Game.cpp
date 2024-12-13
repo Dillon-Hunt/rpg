@@ -128,6 +128,7 @@ void Game::draw() const {
 
     DrawFPS(TILE_SIZE, TILE_SIZE);
 
+    if (mode == EDIT) pallet.draw();
     inventory.draw();
     mouse.draw(cameraOffset);
 

@@ -27,7 +27,6 @@ int main() {
     ) << std::endl;
 
     Pallet::get().load();
-
     Database::get().load("resources/data.db");
 
     Game game;

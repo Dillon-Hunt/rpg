@@ -69,6 +69,8 @@ struct PalletEntry {
 
 class Pallet {
     private:
+        std::map<Tile, Asset> tiles;
+        std::map<PalletType, int> counts;
         std::map<Asset, std::shared_ptr<PalletEntry>> entries;
 
         Pallet() = default;
@@ -95,6 +97,8 @@ class Pallet {
         bool isCollidable(Asset id) const;
 
         const Rectangle& getColider(Asset id) const;
+
+        void draw() const;
 };
 
 #endif // PALLET_H
