@@ -11,6 +11,9 @@ void logDebugInfo(const std::string message) {
     std::cout << message << std::endl;
 }
 
+/**
+ * Entry point for the game, manages main game loop
+ */
 int main() {
     SetTraceLogLevel(LOG_ERROR); 
     InitWindow(WIDTH, HEIGHT, "RPG Game");

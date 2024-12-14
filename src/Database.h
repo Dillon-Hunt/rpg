@@ -32,6 +32,9 @@ struct ObjectDB {
     Tile type;
 };
 
+/**
+ * Communicates with sqlite database
+ */
 class Database {
     private:
         sqlite3* db;

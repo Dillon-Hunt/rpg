@@ -207,7 +207,7 @@ const Rectangle& Pallet::getColider(Asset id) const {
     return entries.at(id)->collider;
 }
 
-bool Pallet::clickHandler(Vector2 mousePosition) {
+bool Pallet::clickHandler(Vector2& mousePosition) {
     if (
         mousePosition.x > WINDOW_PADDING &&
         mousePosition.x < WINDOW_PADDING + (counts.at(TILE) - 1) * TILE_SIZE * SCALE &&

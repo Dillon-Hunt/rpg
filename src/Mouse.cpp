@@ -9,6 +9,19 @@ Point Mouse::getGridPosition() {
     return position;
 }
 
+bool Mouse::clickHandler() {
+    Vector2 newPos = GridPositionToVector2(position);
+
+    if (selected && newPos == selectedTile) {
+        selected = false;
+    } else {
+        selected = true;
+        selectedTile = newPos;
+    }
+
+    return true;
+}
+
 void Mouse::update(Vector2& cameraOffset) {
     // if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
     //     if (IsKeyDown(KEY_LEFT_SHIFT)) {
@@ -36,19 +49,6 @@ void Mouse::update(Vector2& cameraOffset) {
     if (mode == EDIT) {
         selectedTile = GridPositionToVector2(position);
     }
-}
-
-bool Mouse::clickHandler(const Point& gridPosition) {
-    Vector2 newPos = GridPositionToVector2(gridPosition);
-
-    if (selected && newPos == selectedTile) {
-        selected = false;
-    } else {
-        selected = true;
-        selectedTile = newPos;
-    }
-
-    return true;
 }
 
 void Mouse::drawSelector() const {

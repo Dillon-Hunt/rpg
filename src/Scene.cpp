@@ -21,12 +21,12 @@ bool Scene::clickHandler(const Point& gridPosition) {
     return true;
 }
 
-void Scene::setTile(Point p, Tile tile) {
+void Scene::setTile(const Point& p, Tile tile) {
     Point position = GridPositionToChunkPosition(p); 
     getChunk(position)->setTile(p.x - position.x * CHUNK_SIZE, p.y - position.y * CHUNK_SIZE, tile);
 }
 
-std::shared_ptr<Chunk> Scene::getChunk(Point position) {
+std::shared_ptr<Chunk> Scene::getChunk(Point& position) {
     auto it = chunks.find({ position.x, position.y });
 
     if (it == chunks.end()) {

@@ -7,6 +7,9 @@
 #include <memory>
 #include <exception>
 
+/**
+ * Available events
+ */
 enum Event {
     LOG_DEBUG_INFO,
     PLACE_TILE,
@@ -17,11 +20,17 @@ enum Event {
     ESCAPE
 };
 
+/**
+ * Base structure for a listener
+ */
 struct BaseEventListener {
     virtual ~BaseEventListener() = default;
     virtual bool matchesCaller(void* caller) const = 0;
 };
 
+/**
+ * Structure for a listener with a callback with data
+ */
 template <typename Data>
 struct EventListener : BaseEventListener {
     int id;
@@ -35,6 +44,9 @@ struct EventListener : BaseEventListener {
     }
 };
 
+/**
+ * Structure for a listener with a callback without data
+ */
 template <>
 struct EventListener<void> : BaseEventListener {
     int id;
@@ -49,21 +61,43 @@ struct EventListener<void> : BaseEventListener {
     }
 };
 
+/**
+ * Manages events throughout application
+ */
 class EventManager {
     private:
         int lastID;
         std::map<Event, std::vector<std::shared_ptr<BaseEventListener>>> events;
 
+        /**
+         * Constructs a new EventManager object
+         */
         EventManager() : lastID(-1) {}
 
+        /**
+         * Deconstructor for EventManager
+         */
         ~EventManager() {}
 
     public:
+        /**
+         * Retrives the EventManager object
+         *
+         * @returns a static EventManager object
+         */
         static EventManager& get() {
             static EventManager instance;
             return instance;
         }
 
+        /**
+         * Creates a new event listener without any data
+         *
+         * @param event the name of the event
+         * @param caller the object that is listening
+         * @param callback the function to call when the event occurs
+         * @returns the id of the event listener
+         */
         template <typename Caller>
         int addListener(const Event event, Caller* caller, const std::function<void()>& callback) {
             auto listener = std::make_shared<EventListener<void>>(EventListener<void> { ++lastID, caller, callback });
@@ -71,6 +105,14 @@ class EventManager {
             return lastID;
         }
 
+        /**
+         * Creates a new event listener
+         *
+         * @param event the name of the event
+         * @param caller the object that is listening
+         * @param callback the function to call when the event occurs
+         * @returns the id of the event listener
+         */
         template <typename Caller, typename Data>
         int addListener(const Event event, Caller* caller, const std::function<void(const Data&)>& callback) {
             auto listener = std::make_shared<EventListener<Data>>(EventListener<Data> { ++lastID, caller, callback });
@@ -78,6 +120,11 @@ class EventManager {
             return lastID;
         }
         
+        /**
+         * Emits an event without data
+         *
+         * @param event the name of the event
+         */
         void emitEvent(const Event event) {
             if (events.find(event) != events.end()) {
                 for (const auto& listener : events[event]) {
@@ -92,6 +139,12 @@ class EventManager {
             }
         }
 
+        /**
+         * Emits an event with data
+         *
+         * @param event the name of the event
+         * @param data the event's data
+         */
         template <typename Data>
         void emitEvent(const Event event, const Data& data) {
             if (events.find(event) != events.end()) {
@@ -107,6 +160,12 @@ class EventManager {
             }
         }
 
+        /**
+         * Removes a specific listener for a specific caller
+         *
+         * @param event the name of the event to remove
+         * @param caller the caller to remove the listeners for
+         */
         template <typename Caller>
         void removeListener(const Event event, Caller* caller) {
             if (caller == nullptr) return;
@@ -138,6 +197,11 @@ class EventManager {
             }
         }
 
+        /**
+         * Removes all listeners for a specific caller
+         *
+         * @param caller the caller to remove the listeners for
+         */
         template <typename Caller>
         void removeListeners(Caller* caller) {
             if (caller == nullptr) return;
@@ -171,4 +235,4 @@ class EventManager {
         }
 };
 
-#endif // ifndef EVENT_MANAGER_H
+#endif // EVENT_MANAGER_H

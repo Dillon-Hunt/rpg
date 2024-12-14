@@ -7,6 +7,9 @@
 
 #include <iostream>
 
+/**
+ * Handles mouse cursor
+ */
 class Mouse {
     private:
         bool selected;
@@ -17,6 +20,9 @@ class Mouse {
         Mode& mode;
 
     public:
+        /**
+         * Constructs a new mouse instance
+         */
         Mouse(Mode& mode) : selected(false), position({ 0, 0 }), mode(mode) {
             std::cout << "Loading texture: resources/cursor.png" << std::endl;
             std::cout << "Loading texture: resources/selected-tile.png" << std::endl;
@@ -28,16 +34,38 @@ class Mouse {
             });
         }
 
+        /**
+         * Retives the tile position of the mouse
+         */
         Point getGridPosition();
 
-        bool clickHandler(const Point& gridPosition);
+        /**
+         * Handles clicks by selecting and deselecting tiles
+         *
+         * @returns true iff the click was handled
+         */
+        bool clickHandler();
 
+        /**
+         * Updates mouse position
+         *
+         * @param cameraOffset the offset of the frame
+         */
         void update(Vector2& cameraOffset);
 
+        /**
+         * Draws selection around selected tile
+         */
         void drawSelector() const;
 
+        /**
+         * Draws the mouse cursor
+         */
         void drawCursor() const;
 
+        /**
+         * Deconstructs mouse instance
+         */
         ~Mouse() {
             std::cout << "Unloading texture: resources/cursor.png" << std::endl;
             std::cout << "Unloading texture: resources/selected-tile.png" << std::endl;

@@ -1,6 +1,9 @@
 #ifndef NO_COPY_H
 #define NO_COPY_H
 
+/**
+ * Base class that prevents copying for memory safety
+ */
 class NoCopy {
     public:
         NoCopy() = default;

@@ -41,7 +41,7 @@ void Game::clickHandler(const Point& gridPosition) {
 
     switch (mode) {
         case GAME:
-            if (mouse.clickHandler(gridPosition)) return;
+            if (mouse.clickHandler()) return;
             break; 
         case EDIT:
             if (pallet.clickHandler(mousePosition)) return;

@@ -5,6 +5,9 @@
 #include "NoCopy.h"
 #include "Pallet.h"
 
+/**
+ * Structure for an inventory slot
+ */
 struct Slot {
     int quantity;
     Tile item;
@@ -16,12 +19,18 @@ struct Slot {
         : quantity(quantity), item(item), texture(texture) {}
 };
 
+/**
+ * Stores the inventory of the player
+ */
 class Inventory : public NoCopy {
     private:
         int selected;
         Slot slots[HOTBAR_SIZE];
 
     public:
+        /**
+         * Constructs a new inventory
+         */
         Inventory() : selected(0) {
             slots[0] = Slot(
                 4,
@@ -36,12 +45,27 @@ class Inventory : public NoCopy {
             );
         }
 
+        /**
+         * Handles clicks
+         *
+         * @param position of the click
+         * @returns true iff the click was on the inventory
+         */
         bool clickHandler(const Vector2& position);
 
+        /**
+         * Checks for inventory changes
+         */
         void update();
 
+        /**
+         * Draws the inventory / hotbar
+         */
         void draw() const;
 
+        /**
+         * Deconstructs inventory instance
+         */
         ~Inventory() {}
 };
 
